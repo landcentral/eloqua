@@ -1,0 +1,38 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-03-30T18:43:15.335Z</u:Created>
+                        <u:Expires>2011-03-30T18:48:15.335Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <RetrieveResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <RetrieveResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <DynamicEntity>
+                              <EntityType>
+                                    <ID>0</ID>
+                                    <Name>Contact</Name>
+                                    <Type>Base</Type>
+                              </EntityType>
+                              <FieldValueCollection>
+                                    <EntityFields>
+                                          <InternalName>C_EmailAddress</InternalName>
+                                          <Value>test@email.com</Value>
+                                    </EntityFields>
+                                    <EntityFields>
+                                          <InternalName>C_FirstName</InternalName>
+                                          <Value>First</Value>
+                                    </EntityFields>
+                                    <EntityFields>
+                                          <InternalName>C_LastName</InternalName>
+                                          <Value>Last</Value>
+                                    </EntityFields>
+                              </FieldValueCollection>
+                              <Id>1</Id>
+                        </DynamicEntity>
+                  </RetrieveResult>
+            </RetrieveResponse>
+      </s:Body>
+</s:Envelope>

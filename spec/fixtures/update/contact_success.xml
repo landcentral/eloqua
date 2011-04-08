@@ -1,0 +1,26 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-04-07T04:08:25.936Z</u:Created>
+                        <u:Expires>2011-04-07T04:13:25.936Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <UpdateResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <UpdateResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <UpdateResult>
+                              <EntityType>
+                                    <ID>0</ID>
+                                    <Name>Contact</Name>
+                                    <Type>Base</Type>
+                              </EntityType>
+                              <Errors/>
+                              <ID>1</ID>
+                              <Success>true</Success>
+                        </UpdateResult>
+                  </UpdateResult>
+            </UpdateResponse>
+      </s:Body>
+</s:Envelope>

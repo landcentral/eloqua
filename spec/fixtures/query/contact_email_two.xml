@@ -1,0 +1,56 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-04-06T07:04:09.011Z</u:Created>
+                        <u:Expires>2011-04-06T07:09:09.011Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <QueryResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <QueryResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <Entities>
+                              <DynamicEntity>
+                                    <EntityType>
+                                          <ID>0</ID>
+                                          <Name>Contact</Name>
+                                          <Type>Base</Type>
+                                    </EntityType>
+                                    <FieldValueCollection>
+                                          <EntityFields>
+                                                <InternalName>C_EmailAddress</InternalName>
+                                                <Value>james@lightsofapollo.com</Value>
+                                          </EntityFields>
+                                          <EntityFields>
+                                                <InternalName>ContactID</InternalName>
+                                                <Value>1</Value>
+                                          </EntityFields>
+                                    </FieldValueCollection>
+                                    <Id>1</Id>
+                              </DynamicEntity>
+                              <DynamicEntity>
+                                    <EntityType>
+                                          <ID>0</ID>
+                                          <Name>Contact</Name>
+                                          <Type>Base</Type>
+                                    </EntityType>
+                                    <FieldValueCollection>
+                                          <EntityFields>
+                                                <InternalName>C_EmailAddress</InternalName>
+                                                <Value>iam.revelation@gmail.com</Value>
+                                          </EntityFields>
+                                          <EntityFields>
+                                                <InternalName>ContactID</InternalName>
+                                                <Value>2</Value>
+                                          </EntityFields>
+                                    </FieldValueCollection>
+                                    <Id>2</Id>
+                              </DynamicEntity>
+                        </Entities>
+                        <TotalPages>1</TotalPages>
+                        <TotalRecords>2</TotalRecords>
+                  </QueryResult>
+            </QueryResponse>
+      </s:Body>
+</s:Envelope>

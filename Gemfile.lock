@@ -1,0 +1,54 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    activemodel (3.0.6)
+      activesupport (= 3.0.6)
+      builder (~> 2.1.2)
+      i18n (~> 0.5.0)
+    activesupport (3.0.6)
+    builder (2.1.2)
+    crack (0.1.8)
+    diff-lcs (1.1.2)
+    flexmock (0.9.0)
+    gyoku (0.4.2)
+      builder (>= 2.1.2)
+    httpi (0.9.2)
+      ntlm-http (>= 0.1.1)
+      rack
+    i18n (0.5.0)
+    mocha (0.9.12)
+    ntlm-http (0.1.1)
+    rack (1.2.2)
+    rspec (2.5.0)
+      rspec-core (~> 2.5.0)
+      rspec-expectations (~> 2.5.0)
+      rspec-mocks (~> 2.5.0)
+    rspec-core (2.5.1)
+    rspec-expectations (2.5.0)
+      diff-lcs (~> 1.1.2)
+    rspec-mocks (2.5.0)
+    ruby-fsevent (0.2.1)
+    savon (0.8.6)
+      builder (>= 2.1.2)
+      crack (~> 0.1.8)
+      gyoku (>= 0.3.0)
+      httpi (>= 0.7.8)
+    savon_spec (0.1.4)
+      mocha (>= 0.9.8)
+      rspec (>= 2.0.0)
+      savon (~> 0.8.0)
+    watchr (0.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  activemodel
+  activesupport
+  builder
+  flexmock
+  rspec (> 2.0)
+  ruby-fsevent
+  savon
+  savon_spec
+  watchr
