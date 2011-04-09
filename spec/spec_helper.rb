@@ -4,7 +4,6 @@ require 'flexmock'
 
 Bundler.require :default, :test
 
-
 require 'rspec'
 require 'eloqua'
 

@@ -12,7 +12,7 @@ def run(cmd)
 end
 
 def run_all_specs
-  run "rake -s spec"
+  run "rspec spec"
 end
 
 def run_single_spec *spec
@@ -51,7 +51,7 @@ end
 # Watchr Rules
 # --------------------------------------------------
 watch( '^spec/spec_helper\.rb'                    ) {     run_all_specs }
-watch( '^spec/shared_behaviors/.*\.rb'            ) { |m| run_specs_with_shared_examples(m[0]) }
+watch( '^spec/shared/.*\.rb'            ) { |m| run_specs_with_shared_examples(m[0]) }
 watch( '^spec/.*_spec\.rb'                        ) { |m| run_single_spec(m[0]) }
 watch( '^app/(.*)\.rb'                            ) { |m| run_single_spec("spec/%s_spec.rb" % m[1]) }
 watch( '^app/views/(.*)\.haml'                    ) { |m| run_single_spec("spec/views/%s.haml_spec.rb" % m[1]) }
