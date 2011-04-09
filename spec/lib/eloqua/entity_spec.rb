@@ -1,7 +1,11 @@
 require 'spec_helper'
 
 describe Eloqua::Entity do
-
+  
+  def create_xml(&block)
+    subject.api.builder(&block)
+  end
+  
   subject do
     Class.new(Eloqua::Entity) do
       self.entity_type = 'Contact'
@@ -9,10 +13,6 @@ describe Eloqua::Entity do
         'ContactEntity'
       end
     end
-  end
-
-  let(:builder) do
-    subject.api.builder
   end
 
   let(:entity) do
@@ -532,10 +532,14 @@ describe Eloqua::Entity do
     
     context "successful find with all fields" do
       let(:xml_body) do
-        output = ''
-        output = subject.api.builder.entityType(&subject.api.builder_template(:entity, entity))
-        output += subject.api.builder.ids(&subject.api.builder_template(:int_array, [1]))
-        output
+        create_xml do |xml|
+          xml.entityType do
+            xml.template!(:entity, entity)
+          end
+          xml.ids do
+            xml.template!(:int_array, [1])
+          end
+        end
       end
 
       before do
@@ -591,11 +595,14 @@ describe Eloqua::Entity do
       let(:input) { {:email => 'james@lightsofapollo.com'} }
       let(:xml_body) do
         api = subject.api
-        str = api.builder.eloquaType(&api.builder_template(:entity, api.entity('Contact')))
-        str += api.builder.searchQuery("C_EmailAddress='james@lightsofapollo.com'")        
-        str += api.builder.pageNumber(1)
-        str += api.builder.pageSize(200)
-        str
+        create_xml do |xml|
+          xml.eloquaType do
+            xml.template!(:entity, api.entity('Contact'))
+          end
+          xml.searchQuery("C_EmailAddress='james@lightsofapollo.com'")
+          xml.pageNumber(1)
+          xml.pageSize(200)
+        end
       end
       
       before do
@@ -631,11 +638,15 @@ describe Eloqua::Entity do
       let(:input) { {:email => 'james@lightsofapollo.com'} }
       let(:xml_body) do
         api = subject.api
-        str = api.builder.eloquaType(&api.builder_template(:entity, api.entity('Contact')))
-        str += api.builder.searchQuery("C_EmailAddress='james@lightsofapollo.com'")
-        str += api.builder.pageNumber(1)
-        str += api.builder.pageSize(200)
-        str
+        
+        create_xml do |xml|
+          xml.eloquaType do
+            xml.template!(:entity, api.entity('Contact'))
+          end
+          xml.searchQuery("C_EmailAddress='james@lightsofapollo.com'")
+          xml.pageNumber(1)
+          xml.pageSize(200)
+        end
       end
       
       before do
@@ -656,13 +667,14 @@ describe Eloqua::Entity do
       let(:input) { [1, {:C_EmailAddress => 'new'}] }
       let(:xml_body) do
         api = subject.api
-        builder = api.builder
-        
-        template = api.builder_template(:dynamic_entity, api.entity('Contact'), '1', {
-            :C_EmailAddress => 'new',
-        })
-        builder.entities do
-          builder.DynamicEntity(&template)
+        create_xml do |xml|
+          xml.entities do
+            xml.DynamicEntity do
+              xml.template!(:dynamic_entity, api.entity('Contact'), '1', {
+                :C_EmailAddress => 'new',                
+              })
+            end
+          end
         end
       end
 

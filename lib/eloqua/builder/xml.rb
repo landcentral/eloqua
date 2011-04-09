@@ -63,11 +63,22 @@ module Eloqua
         xml.Id(id)
       end
       
+      delegate :builder_template, :to => self
+      
 
-      def initialize(options = {})
+      def initialize(options = {}, &block)
         super
         @namespace = nil
         @namespace = options[:namespace].to_sym if options[:namespace]
+        yield self if block_given?
+      end
+      
+      def self.create(options = {}, &block)
+        new(options, &block).target!
+      end
+            
+      def template!(template, *args)
+        builder_template(template, *args).call(self)
       end
 
 

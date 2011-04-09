@@ -3,6 +3,14 @@ require 'spec_helper'
 describe Eloqua::Builder::Xml do
 
   subject { Eloqua::Builder::Xml }
+  
+  # We might reveal methods on builder so create blank subclass
+  subject {
+    Class.new(Eloqua::Builder::Xml) do
+      reveal(:class)
+      reveal(:is_a?)
+    end
+  }
 
   let(:xml) do
     subject.new(:namespace => 'wsdl')
@@ -10,6 +18,12 @@ describe Eloqua::Builder::Xml do
   
   it "should include Eloqua::Builder::Templates" do
     subject.should include(Eloqua::Builder::Templates)
+  end
+  
+  it 'should allow a block during new providing self' do
+    subject.new do |xml|
+      xml.is_a?(subject)
+    end
   end
 
   context "when default namespace options is set" do
@@ -30,6 +44,30 @@ describe Eloqua::Builder::Xml do
     
   end
   
+  context "#self.create" do
+    
+    let(:klass) do
+      Class.new(subject) do
+        define_builder_template(:zomg) do |xml|
+          xml.wow('zomg')
+        end
+      end
+    end
+    
+    let(:xml_body) do
+      '<big>1</big><wow>zomg</wow>'
+    end
+    
+    it 'should produce expected output' do
+      out = klass.create do |xml|
+        xml.big('1')
+        xml.template!(:zomg)
+      end
+      out.should == xml_body
+    end
+    
+  end
+  
 
   context 'xml templates' do
 
@@ -43,7 +81,7 @@ describe Eloqua::Builder::Xml do
           @args = [input]
         end
         builder = subject.new
-        @output = builder.wrap(&subject.builder_template(template, *@args))
+        @output = subject.create(&subject.builder_template(template, *@args))
       end
 
       it "should return :expected output from template :#{template}" do
@@ -55,10 +93,6 @@ describe Eloqua::Builder::Xml do
       Eloqua::API.entity('Contact')
     end
 
-    let(:builder) do
-      subject.new
-    end
-
     context ':dynamic_entity' do
 
       let(:args) do
@@ -66,10 +100,10 @@ describe Eloqua::Builder::Xml do
       end
 
       let(:expected) do
-        builder.wrap do
-          builder.EntityType(&subject.builder_template(:entity, entity))
-          builder.FieldValueCollection(&subject.builder_template(:entity_fields, args[2]))
-          builder.Id(args[1])
+        subject.create do |xml|
+          xml.EntityType(&subject.builder_template(:entity, entity))
+          xml.FieldValueCollection(&subject.builder_template(:entity_fields, args[2]))
+          xml.Id(args[1])
         end
       end
 
@@ -87,10 +121,10 @@ describe Eloqua::Builder::Xml do
 
 
       let(:expected) do
-        builder.wrap do
-          builder.EntityFields do
-            builder.InternalName('C_EmailAddress')
-            builder.Value('james@localhost')
+        subject.create do |xml|
+          xml.EntityFields do
+            xml.InternalName('C_EmailAddress')
+            xml.Value('james@localhost')
           end
         end
       end
@@ -106,10 +140,10 @@ describe Eloqua::Builder::Xml do
       end
 
       let(:expected) do
-        builder.wrap do
-          builder.ID('0')
-          builder.Name('Contact')
-          builder.Type('Base')
+        subject.create do |xml|
+          xml.ID('0')
+          xml.Name('Contact')
+          xml.Type('Base')
         end
       end
 
@@ -123,11 +157,11 @@ describe Eloqua::Builder::Xml do
         [1, 'string', '1', 'string']
       end
       let(:expected) do
-        builder.wrap do
-          builder.arr(:int, '1')
-          builder.arr(:string, 'string')
-          builder.arr(:string, '1')
-          builder.arr(:string, 'string')
+        subject.create do |xml|
+          xml.arr(:int, '1')
+          xml.arr(:string, 'string')
+          xml.arr(:string, '1')
+          xml.arr(:string, 'string')
         end
       end
 
@@ -143,10 +177,10 @@ describe Eloqua::Builder::Xml do
       end
 
       let(:expected) do
-        builder.wrap do
-          builder.arr(:int, 1)
-          builder.arr(:int, 2)
-          builder.arr(:int, 3)
+        subject.create do |xml|
+          xml.arr(:int, 1)
+          xml.arr(:int, 2)
+          xml.arr(:int, 3)
         end
       end
 

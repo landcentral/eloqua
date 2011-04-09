@@ -225,12 +225,14 @@ module Eloqua
       end
       
       def where(conditions, fields = [], limit = 200, page = 1)
-        xml_query = ""
-        xml_query = api.builder.eloquaType(&api.builder_template(:entity, api.entity(entity_type)))
-        xml_query += api.builder.searchQuery(build_query(conditions))
-        # implement fields
-        xml_query += api.builder.pageNumber(page)
-        xml_query += api.builder.pageSize(limit)
+        xml_query = api.builder do |xml|
+          xml.eloquaType do
+            xml.template!(:entity, api.entity(entity_type))
+          end
+          xml.searchQuery(build_query(conditions))
+          xml.pageNumber(page)
+          xml.pageSize(limit)
+        end
         
         result = request(:query, xml_query)
         if(result[:entities])
@@ -259,8 +261,14 @@ module Eloqua
       # but for our purpose this would only be confusing so only use
       # find for single records and use query for multiple results...
       def find(id)
-        xml_query = api.builder.entityType(&api.builder_template(:entity, api.entity(entity_type)))
-        xml_query += api.builder.ids(&api.builder_template(:int_array, [id]))
+        xml_query = api.builder do |xml|
+          xml.entityType do
+            xml.template!(:entity, api.entity(entity_type))
+          end
+          xml.ids do
+            xml.template!(:int_array, [id])
+          end
+        end
 
         result = request(:retrieve, xml_query)
         if(result[:dynamic_entity] && result[:dynamic_entity][:field_value_collection])
@@ -281,12 +289,14 @@ module Eloqua
       end
       
       def update_entity(entity_id, attributes)
-        template = api.builder_template(:dynamic_entity, api.entity(entity_type), entity_id, attributes)
-        builder = api.builder
-        xml_query = builder.entities do
-          builder.DynamicEntity(&template)
+        xml_query = api.builder do |xml|
+          xml.entities do
+            xml.DynamicEntity do
+              xml.template!(:dynamic_entity, api.entity(entity_type), entity_id, attributes)
+            end
+          end
         end
-        
+                
         result = request(:update, xml_query)
         result = result[:update_result]
         

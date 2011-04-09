@@ -51,7 +51,7 @@ module Eloqua
       end
 
       def builder(&block)
-        Eloqua::Builder::Xml.new(:namespace => :wsdl, &block)
+        Eloqua::Builder::Xml.create(:namespace => :wsdl, &block)
       end
 
       def entity(name, type = 'Base', id = 0)

@@ -135,27 +135,27 @@ describe Eloqua::API do
    #   pp request.to_hash
    # end
 
-    it "should be able to update james@lightsofapollo.com's contact information" do
-  
-        builder = subject.builder
-  
-        template = subject.builder_template(:dynamic_entity, subject.entity('Contact'), '124194', {
-            :C_FirstName => 'James',
-            :C_Arizona1 => 'No',
-            :C_California1 => 'Yes'
-        })
-  
-        request_body = builder.entities do
-          builder.DynamicEntity(&template)
-        end
-  
-        request = subject.send_remote_request(:service, :update) do
-          soap.body = request_body
-        end
-
-        puts request.to_xml
-      end
-
-  end
+  #   it "should be able to update james@lightsofapollo.com's contact information" do
+  # 
+  #       builder = subject.builder
+  # 
+  #       template = subject.builder_template(:dynamic_entity, subject.entity('Contact'), '124194', {
+  #           :C_FirstName => 'James',
+  #           :C_Arizona1 => 'No',
+  #           :C_California1 => 'Yes'
+  #       })
+  # 
+  #       request_body = builder.entities do
+  #         builder.DynamicEntity(&template)
+  #       end
+  # 
+  #       request = subject.send_remote_request(:service, :update) do
+  #         soap.body = request_body
+  #       end
+  # 
+  #       puts request.to_xml
+  #     end
+  # 
+  # end
 
 end
