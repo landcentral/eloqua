@@ -1,4 +1,5 @@
 require 'eloqua/api'
+require 'eloqua/helper/attribute_map'
 require 'active_model'
 require 'active_support/core_ext/hash'
 
@@ -11,29 +12,21 @@ module Eloqua
     include ActiveModel::Validations
     include ActiveModel::Conversion
 
+    include Eloqua::Helper::AttributeMap
+
 
     delegate :api, :to => self
     delegate :request, :to => self
     delegate :client, :to => self
     
-    class_attribute :attribute_map, :attribute_map_reverse,
-                    :primary_key, :entity_type, :attribute_types
-
-    attr_reader :attribute_keys_to_eloqua
+    class_attribute :primary_key, :entity_type, :attribute_types
+    
     attr_reader :attributes
 
-    self.attribute_map = {}.with_indifferent_access
-    self.attribute_map_reverse = {}.with_indifferent_access
     self.attribute_types = {}.with_indifferent_access
 
     self.primary_key = 'id'
     self.entity_type = nil
-
-
-    def self.inherited(subclass)
-      subclass.attribute_map = self.attribute_map.clone
-      subclass.attribute_map_reverse = self.attribute_map_reverse.clone      
-    end
 
 
     # If the remote flag is set to :remote (or true) the object
@@ -42,7 +35,7 @@ module Eloqua
     # This means if you do not have a #map for the object when you are creating it for the first time
     # the object cannot determine the original eloqua name
     def initialize(attr = {}, remote = false)
-      @attribute_keys_to_eloqua = attribute_map_reverse.clone
+      @instance_reverse_keys = attribute_map_reverse.clone
       if(remote)
         @_persisted = true
         attr = map_attributes(attr)
@@ -62,25 +55,6 @@ module Eloqua
         attributes[key] = self.send(attribute_types[key][:import], key, value) if(attribute_types.has_key?(key))
       end
       attributes
-    end
-
-    def map_attributes(attributes)
-      results = {}.with_indifferent_access
-
-      attributes.each do |key, value|
-        formatted_key = attribute_map.fetch(key) { key.to_s.gsub(/^C_/, '').underscore }
-        @attribute_keys_to_eloqua[formatted_key] = key
-        results[formatted_key] = value
-      end
-      results
-    end
-
-    def reverse_map_attributes(attributes)
-      results = {}.with_indifferent_access
-      attributes.each do |key, value|
-        results[@attribute_keys_to_eloqua[key]] = value
-      end
-      results
     end
     
 
@@ -179,26 +153,6 @@ module Eloqua
         end
       end
 
-      
-      def eloqua_attribute(attribute)
-        (attribute_map_reverse.fetch(attribute) { attribute }).to_s
-      end
-
-      def map_attribute(attribute)
-        attribute_map.fetch(attribute) { attribute.to_s }
-      end
-
-      # This shoud always be used over directly editing attribute_map
-      def map(hash)
-        hash.each do |key, value|
-          value = value.to_sym
-          key = key.to_sym
-          
-          attribute_map[key] = value
-          attribute_map_reverse[value] = key
-        end
-      end
-
       def api
         Eloqua::API
       end
@@ -283,9 +237,24 @@ module Eloqua
         end
       end
       
-      
       def create_entity(attributes)
+        xml_query = api.builder do |xml|
+          xml.entities do
+            xml.DynamicEntity do
+              xml.template!(:dynamic_entity, api.entity(entity_type), nil, attributes)
+            end
+          end
+        end
         
+        result = request(:create, xml_query)
+        result = result[:create_result]
+        
+        if(result[:errors].nil? && result[:id])
+          {:id => result[:id].to_i}
+        else
+          # TODO Raise Error here...
+          false
+        end
       end
       
       def update_entity(entity_id, attributes)

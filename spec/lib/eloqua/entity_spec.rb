@@ -18,7 +18,8 @@ describe Eloqua::Entity do
   let(:entity) do
     subject.api.entity('Contact')
   end
-
+  
+  it_behaves_like 'uses attribute map'
 
   context "#initialize" do
 
@@ -206,62 +207,6 @@ describe Eloqua::Entity do
     end
 
   end
-
-  context "#map_attributes" do
-
-    let(:input) do
-      {
-          :C_EmailAddress => 'email@address.com',
-          :ContactID => '1',
-          :normal_id => 'wow'
-      }.with_indifferent_access
-    end
-
-    let(:expected) do
-      {
-          :email_address => 'email@address.com',
-          :id => '1',
-          :normal_id => 'wow'
-      }.with_indifferent_access
-    end
-
-    let(:reverse) do
-      {
-        :email_address => 'C_EmailAddress',
-        :id => 'ContactID',
-        :normal_id => 'normal_id'
-      }.with_indifferent_access
-    end
-
-    before do
-      klass_object = Class.new(subject) do
-        map :ContactID => 'id'
-      end
-      @klass = klass_object.new({}, :remote)
-      @result = @klass.send(:map_attributes, input)
-    end
-
-    it 'should map attributes from CamelCase format to snake_case format' do
-      @result.should == expected
-    end
-
-    it 'should store the original key names in attribute_keys_to_eloqua' do
-      @klass.attribute_keys_to_eloqua.should == reverse
-    end
-
-    context "#reverse_map_attributes" do
-
-      before do
-        @reversed = @klass.send(:reverse_map_attributes, @result)
-      end
-
-      it 'should be able to reverse map_attributes back into input' do
-        @reversed.should == input  
-      end
-
-    end
-
-  end
   
   context "#update_attributes" do
     context "when successfuly updating attributes" do
@@ -407,41 +352,6 @@ describe Eloqua::Entity do
       specify { object.attributes[:california].should == false }
     end        
   end
-
-  context "#self.map" do
-
-    before do
-      @class = Class.new(Eloqua::Entity) do
-        self.entity_type = 'Contact'
-      end      
-    end
-
-    it 'should be able to use map on the class level to map attributes' do
-      @class.map :id => 'C_Attribute'
-      @class.attribute_map[:id].should == :C_Attribute
-    end
-
-    it 'should be able to override existing maps' do
-      @class.map :id => 'not_me'
-      @class.map :id => 'me'
-      @class.attribute_map[:id].should == :me
-    end
-    
-    context 'when reverse' do
-      it 'should also add the reverse to attribute_map_reverse' do
-        @class.map :Contact => 'name'
-        @class.map :IDC => 'id', :Real => 'email'
-
-        reverse = {
-          :name => :Contact,
-          :id => :IDC,
-          :email => :Real
-        }.with_indifferent_access
-        @class.attribute_map_reverse.should == reverse
-      end
-    end
-
-  end
   
   context '#self.primary_key' do
     it 'is "id" by default' do
@@ -461,53 +371,8 @@ describe Eloqua::Entity do
       @class.eloqua_attribute(:email).should == 'C_EmailAddress'
     end
 
-    
   end
-
-  context "#self.map_attribute" do
-
-    before do
-      @class = Class.new(subject) do
-        map :name => 'C_Name', :id => 'ContactID'
-      end
-    end
-
-    it 'should return value in attribute_map when given a key exists' do
-      @class.map_attribute(:name).should == :C_Name
-    end
-
-    it 'should return given value when key does not exist within attribute_map' do
-      @class.map_attribute(:Cezar).should == 'Cezar'
-    end
-
-  end
-
-  context "#self.attribute_map" do
-    specify { subject.attribute_map.class == Hash }
-
-    context "when inherited entity attribute map is cloned by not the same object" do
-      before do
-        @super = Class.new(subject)
-        @super.attribute_map[:id] = 'ContactID'
-        @child = Class.new(@super)
-      end
-
-      it 'should have all the same keys' do
-        @child.attribute_map.keys.should == @super.attribute_map.keys 
-      end
-
-      it 'should have all the same values' do
-        @child.attribute_map.values.should == @super.attribute_map.values
-      end
-
-      it 'should not be the same object as parent' do
-        @child.attribute_map.object_id.should_not === @super.attribute_map.object_id
-      end
-
-    end
-    
-  end
-
+  
   context "#self.api" do
     it 'should have api on the class level' do
       subject.api.should == Eloqua::API
@@ -661,9 +526,42 @@ describe Eloqua::Entity do
     
   end
   
+  context '#self.create_entity' do
+    
+    context 'when successfuly creating one record' do
+
+      let(:input) { [{:C_EmailAddress => 'create'}] }
+      let(:xml_body) do
+        api = subject.api
+        create_xml do |xml|
+          xml.entities do
+            xml.DynamicEntity do
+              xml.template!(:dynamic_entity, api.entity('Contact'), nil, {
+                :C_EmailAddress => 'create',                
+              })
+            end
+          end
+        end
+      end
+      
+      before do
+        mock = soap_fixture(:create, :contact_success)
+        flexmock(subject.api).should_receive(:send_remote_request).with(:service, :create, xml_body).and_return(mock)
+        @results = subject.create_entity(*input)
+      end
+      
+      
+      it 'should return {:id => 1}' do
+        @results[:id].should == 1
+      end
+                  
+    end
+    
+  end
+  
   context "#self.update_entity" do
     
-    context "when successfuly updating one row" do
+    context "when successfuly updating one record" do
       let(:input) { [1, {:C_EmailAddress => 'new'}] }
       let(:xml_body) do
         api = subject.api

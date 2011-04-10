@@ -12,9 +12,8 @@ unless defined?(ELOQUA_LIB)
   $: << ELOQUA_LIB
 end
 
-Dir[File.dirname(__FILE__) + '/support/**/*.rb'].each do |support|
-  require support
-end
+Dir[File.dirname(__FILE__) + '/support/**/*.rb'].each {|support| require support}
+Dir[File.dirname(__FILE__) + '/shared/**/*.rb'].each {|support| require support}
 
 RSpec.configure do |config|
   

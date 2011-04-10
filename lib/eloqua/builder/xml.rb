@@ -60,7 +60,7 @@ module Eloqua
       define_builder_template :dynamic_entity do |xml, type, id, attributes|
         xml.EntityType(&builder_template(:entity, type))
         xml.FieldValueCollection(&builder_template(:entity_fields, attributes))
-        xml.Id(id)
+        xml.Id(id) if id
       end
       
       delegate :builder_template, :to => self
