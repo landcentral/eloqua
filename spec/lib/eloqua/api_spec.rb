@@ -11,7 +11,12 @@ describe Eloqua::API do
   end
   
   context '#builder' do
-    specify { subject.builder.is_a?(Eloqua::Builder::Xml).should be_true }
+    
+    it 'should call Eloqua::Builder::Xml.create' do
+      flexmock(Eloqua::Builder::Xml).should_receive(:create).once
+      subject.builder
+    end
+        
   end
 
   context "#request" do
@@ -156,6 +161,7 @@ describe Eloqua::API do
   #       puts request.to_xml
   #     end
   # 
-  # end
+  
+  end
 
 end

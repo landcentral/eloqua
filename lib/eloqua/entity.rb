@@ -248,12 +248,11 @@ module Eloqua
         
         result = request(:create, xml_query)
         result = result[:create_result]
-        
+              
         if(result[:errors].nil? && result[:id])
           {:id => result[:id].to_i}
         else
-          # TODO Raise Error here...
-          false
+          handle_remote_exception(result)
         end
       end
       
@@ -272,11 +271,26 @@ module Eloqua
         if(result[:success] && result[:id].to_s == entity_id.to_s)
           true
         else
-          # TODO Raise Error here..
-          false
+          handle_remote_exception(result)
         end
       end
-
+      
+      def handle_remote_exception(response)
+        exception = response[:errors][:error]
+        
+        error_code = exception[:error_code]
+        message = exception[:message]
+        
+        error_message = sprintf("Eloqua Error: Code (%s) | Message: %s", error_code, message)
+        
+        if(error_code =~ /Duplicate/)
+          raise(Eloqua::DuplicateRecordError, error_message)
+        else
+          raise(Eloqua::RemoteError, error_message)
+        end
+        false
+      end
+      
     end
 
   end

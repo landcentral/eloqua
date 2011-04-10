@@ -528,9 +528,10 @@ describe Eloqua::Entity do
   
   context '#self.create_entity' do
     
+    let(:input) { [{:C_EmailAddress => 'create'}] }
+    
     context 'when successfuly creating one record' do
-
-      let(:input) { [{:C_EmailAddress => 'create'}] }
+      
       let(:xml_body) do
         api = subject.api
         create_xml do |xml|
@@ -554,8 +555,20 @@ describe Eloqua::Entity do
       it 'should return {:id => 1}' do
         @results[:id].should == 1
       end
-                  
+                        
     end
+    
+    context "when the record is duplicate" do
+      before do
+        mock = soap_fixture(:create, :contact_duplicate)
+        flexmock(subject.api).should_receive(:send_remote_request).and_return(mock)
+      end
+      
+      it 'should raise duplicate error exception' do
+        lambda { subject.create_entity(*input) }.should raise_exception(Eloqua::DuplicateRecordError)
+      end
+      
+    end    
     
   end
   
@@ -632,6 +645,26 @@ describe Eloqua::Entity do
       
     end
     
+  end
+  
+  context "#self.handle_remote_errors" do
+    context 'duplicate error' do
+      
+      let(:response) do
+        {:errors=>
+          {:error=>
+            {:error_code=>"DuplicateValue",
+             :message=>"You are attempting to create a duplicate entity."}},
+         :id=>"-1",
+         :entity_type=>{:type=>"Base", :name=>"Contact", :id=>"0"}
+        }   
+      end
+      
+      it 'should raise duplicate exception' do
+        lambda { subject.handle_remote_exception(response) }.should raise_exception(Eloqua::DuplicateRecordError)
+      end
+      
+    end
   end
 
 end

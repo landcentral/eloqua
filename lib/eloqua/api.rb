@@ -5,6 +5,7 @@ require 'active_support/concern'
 require 'active_support/core_ext/module/delegation'
 
 require 'eloqua/builder/xml'
+require 'eloqua/exceptions'
 
 module Eloqua
 
