@@ -76,7 +76,7 @@ describe Eloqua::Entity do
     it 'should be true when initializing with id' do
       subject.new(:id => '1').should be_persisted
     end
-    
+        
     context 'when initialized with :remote' do
       it 'should be considered persisted' do
         subject.new({:C_EmailAddress => 'email'}, :remote).should be_persisted
@@ -205,76 +205,79 @@ describe Eloqua::Entity do
       end
       
     end
-
+  
   end
   
-  context "#update_attributes" do
-    context "when successfuly updating attributes" do
-      let(:input) do
-        {:email => 'email', :name => 'first'}
+  context 'dirty attributes' do
+    
+    let(:klass) do
+      Class.new(subject) do
+        map :C_EmailAddress => :email
       end
-
-      let(:klass) do
-        Class.new(subject) do
-          map :C_EmailAddress => :email
-          map :C_FirstName => :name
-          map :ContactID => :id
-        end
-      end
-
-      let(:object) { klass.new(:id => 1) }
-
-      let(:expected) do
-        {
-          :C_EmailAddress => 'email',
-          :C_FirstName => 'first'
-        }.with_indifferent_access
-      end
-
-      before do
-        flexmock(klass).should_receive(:update_entity).\
-                           with(1, expected).and_return(true)
-
-        @result = object.update_attributes(input)      
-      end
-
-      it 'should call update entity to make the api call' do
-        @result.should be_true
-      end
-
-      specify { object.email.should == 'email' }
-      specify { object.name.should == 'first' }      
     end
     
-    context 'when using attr_accessable to limit mass assignment' do
-      let(:input) do
-        {:email => 'email', :name => 'first'}
+    let(:object) do
+      klass.new
+    end
+    
+    it 'should call attribute_will_change! when using attribute_write' do
+      flexmock(object).should_receive(:attribute_will_change!).with("email").once
+      object.email = 'email'
+    end
+    
+    context 'when email has changed' do
+      before do
+        object.email = 'old'
+        object.email = 'new'
       end
-
-      let(:klass) do
-        Class.new(subject) do
-          map :C_EmailAddress => :email
-          map :C_FirstName => :name
-          map :ContactID => :id
-          
-          attr_accessible :email
-          
-        end
-      end
-
-      let(:object) { klass.new(:id => 1, :name => 'james') }
-
-      let(:expected) do
-        {
-          :C_EmailAddress => 'email',
-        }.with_indifferent_access
-      end      
       
+      it 'should have old value available via attribute_was' do
+        object.attribute_was(:email).should == 'old'
+      end
+
+      it 'should have old and new value available via attribue_change' do
+        object.attribute_change(:email).should == ['old', 'new']
+      end
+      
+      it 'should provide a list of all changed attributes via changed' do
+        object.changed.should == ['email']
+      end
+    end
+  end
+  
+  context "when persisting object" do
+    let(:input) do
+      {:email => 'email', :name => 'first'}
+    end
+
+    let(:klass) do
+      Class.new(subject) do
+        map :C_EmailAddress => :email
+        map :C_FirstName => :name
+        map :ContactID => :id
+        
+        validates_presence_of :email
+      end
+    end
+
+    let(:object) { klass.new(:id => 1) }
+
+    let(:expected) do
+      {
+        :C_EmailAddress => 'email',
+        :C_FirstName => 'first'
+      }.with_indifferent_access
+    end
+    
+    context "#update" do
       before do
         flexmock(klass).should_receive(:update_entity).\
                            with(1, expected).and_return(true)
 
-        @result = object.update_attributes(input)      
+        object.email = 'email'
+        object.name = 'first'
+        
+        @result = object.update
       end
 
       it 'should call update entity to make the api call' do
@@ -282,11 +285,164 @@ describe Eloqua::Entity do
       end
 
       specify { object.email.should == 'email' }
-      specify { object.name.should == 'james' }
+      specify { object.name.should == 'first' }
     end    
-        
-  end
+    
+    context "#create" do
+      
+      let(:object) { klass.new }
+      
+      before do
+        flexmock(klass).should_receive(:create_entity).\
+                           with(expected).and_return({:id => 1})
+                            
+        object.email = 'email'
+        object.name = 'first'
+        @result = object.create
+      end
 
+      it 'should call update entity to make the api call' do
+        @result.should be_true
+      end
+
+      specify { object.id.should == 1 }
+      specify { object.email.should == 'email' }
+      specify { object.name.should == 'first' }
+    end
+    
+    context "#save" do
+            
+      context 'when save will create' do
+        let(:object) do
+          klass.new(:email => 'james@lightsofapollo.com')
+        end
+        
+        before do
+          flexmock(klass).should_receive(:create_entity).\
+                             with({'C_EmailAddress' => 'james@lightsofapollo.com'}).\
+                             and_return({:id => 1}).once
+          object.save
+        end
+        
+        it 'should now be persisted?' do
+          object.should be_persisted
+        end
+        
+        it 'should now have an id' do
+          object.id.should == 1
+        end
+        
+      end
+      
+      context 'when save will update' do
+        
+        let(:object) do
+          klass.new(:id => 1, :email => 'james@lightsofapollo.com')
+        end
+        
+        before do
+          flexmock(klass).should_receive(:update_entity).\
+                             with(1, {'C_EmailAddress' => 'new'}).\
+                             and_return(true).once
+
+          object.email = 'new'
+          object.save
+        end
+        
+        it 'should now be persisted?' do
+          object.should be_persisted
+        end
+        
+        it 'should have updated email address to "new"' do
+          object.email.should == 'new'
+        end
+                
+      end
+      
+      context "when record is invalid" do
+        
+        let(:object) do
+          klass.new(:id => 1)
+        end
+        
+        it 'should not be valid' do
+          object.should_not be_valid
+        end
+        
+        it 'should return false when saving' do
+          object.save.should be_false
+        end
+        
+      end
+      
+    end    
+    
+    context "#update_attributes" do
+      context "when successfuly updating record" do
+        let(:klass) do
+          Class.new(subject) do
+            map :C_EmailAddress => :email
+            map :C_FirstName => :name
+            map :ContactID => :id
+
+            attr_accessible :email
+          end
+        end
+
+        let(:object) { klass.new(:id => 1, :name => 'james') }
+
+        let(:expected) do
+          {
+            :email => 'email',
+          }.with_indifferent_access
+        end      
+
+        before do
+          flexmock(klass).should_receive(:update_entity).\
+                             with(1, {'C_EmailAddress' => 'email'}).and_return(true)
+
+          @result = object.update_attributes(input)      
+        end
+
+        it 'should call update entity to make the api call' do
+          @result.should be_true
+        end
+
+        specify { object.email.should == 'email' }
+        specify { object.name.should == 'james' }        
+        
+      end
+      
+      
+      context 'when updating attributes of invalid object' do
+        
+        let(:input) do
+          {}
+        end
+        
+        let(:object) { klass.new }
+        
+        before do
+          flexmock(object).should_receive(:create).never
+          flexmock(object).should_receive(:update).never
+        end
+        
+        it 'should be invalid' do
+          object.should_not be_valid
+        end
+        
+        it 'should return false' do
+          object = klass.new
+          object.update_attributes(input).should be_false
+        end
+        
+      end
+      
+    end
+        
+    
+  end
+  
   context "#self.attr_type_hash" do
 
     let(:expected) do

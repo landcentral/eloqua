@@ -11,9 +11,16 @@ module Eloqua
     include ActiveModel::Naming
     include ActiveModel::Validations
     include ActiveModel::Conversion
-
+    include ActiveModel::AttributeMethods
+    
+    # Because we never absolutely know what attributes are defined
+    # We do not use define_attribute_method for dirty meaning #{attr}_changed? will not work
+    # instead use the private methods provided by dirty IE: attribute_changed?(:attr)
+    include ActiveModel::Dirty
     include Eloqua::Helper::AttributeMap
-
+        
+    DIRTY_PRIVATE_METHODS = [:attribute_was, :attribute_changed?, :attribute_change]
+    DIRTY_PRIVATE_METHODS.each {|method| public method }
 
     delegate :api, :to => self
     delegate :request, :to => self
@@ -27,8 +34,7 @@ module Eloqua
 
     self.primary_key = 'id'
     self.entity_type = nil
-
-
+      
     # If the remote flag is set to :remote (or true) the object
     # assumes that the attributes are from eloqua directly in their format (IE: C_EmailAddress)
     # it will then format them to a more ruby-ish key (:email_address) and then store the original name
@@ -44,6 +50,7 @@ module Eloqua
       if(@attributes.has_key?(primary_key) && @attributes[primary_key])
         @_persisted = true
       end
+      
     end
     
     def persisted?
@@ -60,25 +67,60 @@ module Eloqua
 
     private :map_attributes, :reverse_map_attributes
     
-    # Data 
+    # Persistance
+    
+    def create
+      attrs = reverse_map_attributes(attributes)
+      result = self.class.create_entity(attrs)
+      if(result)
+        @_persisted = true
+        write_attribute(:id, result[:id])
+        true
+      else
+        false
+      end
+    end
+    
+    def update
+      update_attributes = changed.inject({}) do |map, attr|
+        map[attr] = send(attr.to_sym)
+        map
+      end      
+      attrs = reverse_map_attributes(update_attributes)
+      self.class.update_entity(self.attributes[primary_key].to_i, attrs)      
+    end
+    
+    def save(options = {})
+      if(valid?)
+        (persisted?) ? update : create
+        true
+      else
+        false
+      end
+    end
     
     def update_attributes(attrs)
       attrs = sanitize_for_mass_assignment(attrs)
       attrs.each do |key, value|
         write_attribute(key, value)
       end
-      
-      attrs = reverse_map_attributes(attrs)
-      self.class.update_entity(self.attributes[primary_key].to_i, attrs)
+      save
     end
     
     # Magic
+    
+    # Monkey Patch. Rails uses a normal array for changed_attributes and
+    # relys on method missing to provide the same type all the time
+    def changed_attributes
+      @changed_attributes ||= {}.with_indifferent_access
+    end
     
     def read_attribute(attr)
       attributes[attr]
     end
     
     def write_attribute(attr, value)
+      attribute_will_change!(attr) unless read_attribute(attr) == value
       attributes[attr] = value
     end
     
@@ -92,6 +134,10 @@ module Eloqua
       end
     end    
     
+    def id
+      read_attribute(:id)
+    end
+        
     def method_missing(method, *args)
       attr_method = is_attribute_method?(method)
       attr = method.to_s.gsub(/\=$/, '')
