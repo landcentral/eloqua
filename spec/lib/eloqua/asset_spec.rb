@@ -17,7 +17,7 @@ describe Eloqua::Asset do
       map :name => :name
       map :description => :description
     end
-  end  
+  end
   
   #it_behaves_like 'supports CURD remote operations', :asset
   
@@ -33,15 +33,15 @@ describe Eloqua::Asset do
   #   
   # end
   
-  context 'find asset' do
-    
-    it 'should retreive asset' do
-      object = klass.find(123)
-      object.name = '(Test) Property #5760'
-      pp object.save
-    end
-    
-  end
+  # context 'find asset' do
+  #   
+  #   it 'should retreive asset' do
+  #     object = klass.find(123)
+  #     object.name = '(Test) Property #5760'
+  #     pp object.save
+  #   end
+  #   
+  # end
   
   # it 'should list all assets' do
   #   pp subject.request(:list_asset_types)

@@ -216,7 +216,7 @@ module Eloqua
       # find for single records and use query for multiple results...
       def find(id)
         xml_query = api.builder do |xml|
-          xml.tag!("#{remote_object}Type") do
+          xml.object_type_lower!(remote_object) do
             xml.template!(:object_type, remote_object_type)
           end
           xml.ids do
@@ -228,9 +228,7 @@ module Eloqua
         
         field_key = "#{remote_object}_fields".to_sym
         dynamic_key = "dynamic_#{remote_object}".to_sym
-        
-        pp result
-        
+                
         if(result[dynamic_key] && result[dynamic_key][:field_value_collection])
           attribute_list = result[dynamic_key][:field_value_collection][field_key]
           attributes = {:id => result[dynamic_key][:id].to_i}
@@ -270,8 +268,8 @@ module Eloqua
             
       def create_remote_object(attributes)
         xml_query = api.builder do |xml|
-          xml.tag!(remote_object.to_s.pluralize) do
-            xml.tag!(dynamic_tag) do
+          xml.object_collection!(remote_object) do
+            xml.dynamic_object!(remote_object) do
               xml.template!(:dynamic, remote_object, remote_object_type, nil, attributes)
             end
           end
@@ -279,7 +277,7 @@ module Eloqua
         
         result = request(remote_service_method(:create), xml_query)
         result = result[remote_key_with_object(:create_result)]
-        pp result
+        
         if(result[:errors].nil? && result[:id])
           {:id => result[:id].to_i}
         else
@@ -289,8 +287,8 @@ module Eloqua
       
       def update_remote_object(entity_id, attributes)
         xml_query = api.builder do |xml|
-          xml.tag!(remote_object.to_s.pluralize) do
-            xml.tag!(dynamic_tag) do
+          xml.object_collection!(remote_object) do
+            xml.dynamic_object!(remote_object) do
               xml.template!(:dynamic, remote_object, remote_object_type, entity_id, attributes)
             end
           end

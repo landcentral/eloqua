@@ -5,33 +5,13 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
   end
   
   let(:remote_type) { @remote_type }
-    
-  def remote_object_type
-    "#{@remote_type}Type"
-  end
-  
-  def dynamic_type
-    "Dynamic#{@remote_type.to_s.camelize}"
-  end
-  
-  def tag_with_type(tag)
-    "#{tag}_#{@remote_type}".to_sym
-  end
-  
-  def remote_method(method)
-    if(@remote_type == :entity)
-      method.to_sym
-    else
-      ("#{method}_#{@remote_type}").to_sym
-    end
-  end
   
   context "#self.find" do
     
     context "successful find with all fields" do
       let(:xml_body) do
         create_xml do |xml|
-          xml.tag!(remote_object_type) do
+          xml.object_type_lower!(remote_type) do
             xml.template!(:object_type, subject.remote_object_type)
           end
           xml.ids do

@@ -1,6 +1,10 @@
 require 'spec_helper'
 
 describe Eloqua::Builder::Xml do
+  
+  def xml!(&block)
+    subject.create(&block)
+  end
 
   subject { Eloqua::Builder::Xml }
   
@@ -43,6 +47,44 @@ describe Eloqua::Builder::Xml do
     end
     
   end
+  
+  # Entity/Asset Helpers
+  
+  context '#dynamic_object!' do
+    
+    let(:expected) { '<DynamicAsset>content</DynamicAsset>' }
+    
+    it 'should return expected xml' do
+      xml! {|xml| xml.dynamic_object!(:asset, 'content') }.should == expected
+    end
+    
+  end
+  
+  context '#object_type!' do
+    let(:expected) { '<AssetType>content</AssetType>' }
+    
+    it 'should return expected xml' do
+      xml! {|xml| xml.object_type!(:asset, 'content') }.should == expected
+    end
+    
+  end
+  
+  context '#object_type_lower!' do
+    let(:expected) { '<assetType>content</assetType>' }
+    
+    it 'should return expected xml' do
+      xml! {|xml| xml.object_type_lower!(:asset, 'content') }.should == expected
+    end
+    
+  end  
+  
+  context '#object_collection!' do
+    let(:expected) { "<entities><one>1</one></entities>" }
+    it 'should return expected xml' do
+      xml! {|xml| xml.object_collection!(:entity) { xml.one('1') } }.should == expected
+    end
+  end
+  
   
   context "#self.create" do
     

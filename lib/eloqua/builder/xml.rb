@@ -86,7 +86,22 @@ module Eloqua
       def template!(template, *args)
         builder_template(template, *args).call(self)
       end
-
+      
+      def dynamic_object!(sym, *args, &block)
+        tag!("Dynamic#{sym.to_s.camelize}", *args, &block)
+      end
+      
+      def object_type!(sym, *args, &block)
+        tag!("#{sym.to_s.camelize}Type", *args, &block)
+      end
+      
+      def object_type_lower!(sym, *args, &block)
+        tag!("#{sym}Type", *args, &block)
+      end      
+      
+      def object_collection!(sym, *args, &block)
+        tag!("#{sym.to_s.pluralize.downcase}", *args, &block)
+      end
 
       # Extend to allow default namespace
       def method_missing(sym, *args, &block)

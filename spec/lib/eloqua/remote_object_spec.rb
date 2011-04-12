@@ -593,8 +593,6 @@ describe Eloqua::RemoteObject do
       
     end
     
-    
-    
   end  
   
   context "#remote_service_method" do
