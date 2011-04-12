@@ -39,16 +39,16 @@ module Eloqua
       end
 
       # For use with the entity function
-      define_builder_template :entity do |xml, entity|
-        xml.ID(entity['ID'])
-        xml.Name(entity['Name'])
-        xml.Type(entity['Type'])
+      define_builder_template :object_type do |xml, object|
+        xml.ID(object['ID'])
+        xml.Name(object['Name'])
+        xml.Type(object['Type'])
       end
 
       # defines entity attribute fields for use in update/create
-      define_builder_template :entity_fields do |xml, entity_attributes|
+      define_builder_template :fields do |xml, object_type, entity_attributes|
         entity_attributes.each do |attribute, value|
-          xml.EntityFields do
+          xml.tag!("#{object_type.to_s.camelize}Fields") do
             xml.InternalName(attribute.to_s)
             xml.Value(value)
           end
@@ -57,9 +57,15 @@ module Eloqua
 
       # Dynamic entity for update/create/etc...
 
-      define_builder_template :dynamic_entity do |xml, type, id, attributes|
-        xml.EntityType(&builder_template(:entity, type))
-        xml.FieldValueCollection(&builder_template(:entity_fields, attributes))
+      define_builder_template :dynamic do |xml, object_type, type, id, attributes|
+        xml.tag!("#{object_type.to_s.camelize}Type") do
+          xml.template!(:object_type, type)
+        end
+        
+        xml.FieldValueCollection do
+          xml.template!(:fields, object_type, attributes)
+        end
+        
         xml.Id(id) if id
       end
       

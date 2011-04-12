@@ -24,7 +24,7 @@ module Eloqua
         def inherited_with_clone_attributes(klass)
           klass.attribute_map = attribute_map.clone
           klass.attribute_map_reverse = attribute_map_reverse.clone
-          inherited_without_clone_attributes(klass) if method_exists?(:inherited_without_clone_attributes)
+          inherited_without_clone_attributes(klass) if method_defined?(:inherited_without_clone_attributes)
         end        
                         
         def eloqua_attribute(attribute)

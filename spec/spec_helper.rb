@@ -2,6 +2,9 @@ require 'rubygems'
 require "bundler/setup"
 require 'flexmock'
 
+require 'net/http'
+require 'net/https'
+
 Bundler.require :default, :test
 
 require 'rspec'

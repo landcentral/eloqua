@@ -49,8 +49,8 @@ shared_examples_for "uses attribute map" do
   context "#self.map" do
 
     before do
-      @class = Class.new(Eloqua::Entity) do
-        self.entity_type = 'Contact'
+      @class = Class.new(Eloqua::RemoteObject) do
+        self.remote_object_type = Eloqua::API.remote_object_type('Contact')
       end      
     end
 

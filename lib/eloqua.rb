@@ -1,5 +1,6 @@
 require 'eloqua/api'
 require 'eloqua/entity'
+require 'eloqua/asset'
 
 module Eloqua
   

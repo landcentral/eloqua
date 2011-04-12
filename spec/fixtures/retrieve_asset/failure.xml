@@ -1,0 +1,17 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-04-12T01:51:52.684Z</u:Created>
+                        <u:Expires>2011-04-12T01:56:52.684Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <RetrieveAssetResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <RetrieveAssetResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <DynamicAsset i:nil="true"/>
+                  </RetrieveAssetResult>
+            </RetrieveAssetResponse>
+      </s:Body>
+</s:Envelope>

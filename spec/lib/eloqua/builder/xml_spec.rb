@@ -90,28 +90,36 @@ describe Eloqua::Builder::Xml do
     end
 
     let(:entity) do
-      Eloqua::API.entity('Contact')
+      Eloqua::API.remote_object_type('Contact')
     end
 
-    context ':dynamic_entity' do
+    context ':dynamic' do
 
       let(:args) do
-        [Eloqua::API.entity('Contact'), 124194, {:C_Company => 'Lights of Apollo LLC'}]
+        ['entity', Eloqua::API.remote_object_type('Contact'), 124194, {:C_Company => 'Lights of Apollo LLC'}]
       end
 
       let(:expected) do
         subject.create do |xml|
-          xml.EntityType(&subject.builder_template(:entity, entity))
-          xml.FieldValueCollection(&subject.builder_template(:entity_fields, args[2]))
-          xml.Id(args[1])
+          xml.EntityType do
+            xml.template!(:object_type, entity)
+          end
+          xml.FieldValueCollection do
+            xml.template!(:fields, 'entity', args[3])
+          end
+          xml.Id(args[2])
         end
       end
 
-      it_behaves_like 'expected template output', :dynamic_entity
+      it_behaves_like 'expected template output', :dynamic
 
     end
 
-    context ':entity_fields' do
+    context ':fields' do
+
+      let(:args) do
+        ['entity', input]
+      end
 
       let(:input) do
         list = {}
@@ -129,14 +137,14 @@ describe Eloqua::Builder::Xml do
         end
       end
 
-      it_behaves_like 'expected template output', :entity_fields
+      it_behaves_like 'expected template output', :fields
 
     end
 
     context ':entity' do
 
       let(:input) do
-        Eloqua::API.entity('Contact')
+        Eloqua::API.remote_object_type('Contact')
       end
 
       let(:expected) do
@@ -147,7 +155,7 @@ describe Eloqua::Builder::Xml do
         end
       end
 
-      it_behaves_like 'expected template output', :entity
+      it_behaves_like 'expected template output', :object_type
 
     end
 

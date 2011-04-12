@@ -32,7 +32,7 @@ def run_specs_with_shared_examples(shared_example_filename, spec_path = 'spec')
 
   # Returns array with filenames of the specs using shared_example
   def specs_with_shared_example(shared_example, path)
-    command = "grep -lrE 'it_should_behave_like .(#{shared_example}).' #{path}"
+    command = "grep -lrE 'it_behaves_like .(#{shared_example}).' #{path}"
     `#{command}`.split
   end
 

@@ -1,0 +1,50 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-04-12T01:50:37.574Z</u:Created>
+                        <u:Expires>2011-04-12T01:55:37.574Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <RetrieveAssetResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <RetrieveAssetResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <DynamicAsset>
+                              <AssetType>
+                                    <ID>0</ID>
+                                    <Name>ContactGroupName</Name>
+                                    <Type>ContactGroup</Type>
+                              </AssetType>
+                              <FieldValueCollection>
+                                    <AssetFields>
+                                          <InternalName>name</InternalName>
+                                          <Value>James created this contact group (again) !</Value>
+                                    </AssetFields>
+                                    <AssetFields>
+                                          <InternalName>description</InternalName>
+                                          <Value>through the api =)</Value>
+                                    </AssetFields>
+                                    <AssetFields>
+                                          <InternalName>createdby</InternalName>
+                                          <Value>Radius.API</Value>
+                                    </AssetFields>
+                                    <AssetFields>
+                                          <InternalName>createdat</InternalName>
+                                          <Value>4/11/2011 9:36:34 PM</Value>
+                                    </AssetFields>
+                                    <AssetFields>
+                                          <InternalName>modifiedby</InternalName>
+                                          <Value>Radius.API</Value>
+                                    </AssetFields>
+                                    <AssetFields>
+                                          <InternalName>modifiedat</InternalName>
+                                          <Value>4/11/2011 9:36:34 PM</Value>
+                                    </AssetFields>
+                              </FieldValueCollection>
+                              <Id>123</Id>
+                        </DynamicAsset>
+                  </RetrieveAssetResult>
+            </RetrieveAssetResponse>
+      </s:Body>
+</s:Envelope>
