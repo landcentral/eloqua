@@ -85,7 +85,6 @@ describe Eloqua::Builder::Xml do
     end
   end
   
-  
   context "#self.create" do
     
     let(:klass) do
@@ -110,7 +109,6 @@ describe Eloqua::Builder::Xml do
     
   end
   
-
   context 'xml templates' do
 
     share_examples_for "expected template output" do |template|
@@ -133,6 +131,26 @@ describe Eloqua::Builder::Xml do
 
     let(:entity) do
       Eloqua::API.remote_object_type('Contact')
+    end
+    
+    context ':object' do
+      let(:args) do
+        ['random', Eloqua::API.remote_object_type('Contact'), 1]
+      end
+      
+      let(:expected) do
+        xml! do |xml|
+          xml.random do
+            xml.RandomType do
+              xml.template!(:object_type, Eloqua::API.remote_object_type('Contact'))
+            end
+            xml.Id(1)
+          end
+        end
+      end
+      
+      it_behaves_like 'expected template output', :object
+      
     end
 
     context ':dynamic' do

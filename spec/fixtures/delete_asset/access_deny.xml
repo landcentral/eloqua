@@ -1,0 +1,31 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-04-13T00:47:02.906Z</u:Created>
+                        <u:Expires>2011-04-13T00:52:02.906Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <DeleteAssetResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <DeleteAssetResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <DeleteAssetResult>
+                              <AssetType>
+                                    <ID>0</ID>
+                                    <Name>ContactGroupName</Name>
+                                    <Type>ContactGroup</Type>
+                              </AssetType>
+                              <Errors>
+                                    <Error>
+                                          <ErrorCode>UnauthorizedAction</ErrorCode>
+                                          <Message>You are not authorized to delete contact groups.</Message>
+                                    </Error>
+                              </Errors>
+                              <ID>0</ID>
+                              <Success>false</Success>
+                        </DeleteAssetResult>
+                  </DeleteAssetResult>
+            </DeleteAssetResponse>
+      </s:Body>
+</s:Envelope>

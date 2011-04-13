@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe Eloqua::Entity do
   
-  def create_xml(&block)
-    subject.api.builder(&block)
-  end
-  
   subject do
     Class.new(Eloqua::Entity) do
       self.remote_object_type = Eloqua::API.remote_object_type('Contact')
@@ -82,7 +78,7 @@ describe Eloqua::Entity do
       let(:input) { {:email => 'james@lightsofapollo.com'} }
       let(:xml_body) do
         api = subject.api
-        create_xml do |xml|
+        xml! do |xml|
           xml.eloquaType do
             xml.template!(:object_type, api.remote_object_type('Contact'))
           end
@@ -126,7 +122,7 @@ describe Eloqua::Entity do
       let(:xml_body) do
         api = subject.api
         
-        create_xml do |xml|
+        xml! do |xml|
           xml.eloquaType do
             xml.template!(:object_type, api.remote_object_type('Contact'))
           end

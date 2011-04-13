@@ -223,6 +223,7 @@ module Eloqua
             xml.template!(:int_array, [id])
           end
         end
+        
 
         result = request(remote_service_method(:retrieve), xml_query)
         
@@ -299,6 +300,26 @@ module Eloqua
         
         if(result[:success] && result[:id].to_s == entity_id.to_s)
           true
+        else
+          handle_remote_exception(result)
+        end
+      end
+      
+      def delete_remote_object(id)
+        xml_query = api.builder do |xml|
+          xml.object_type_lower!(remote_object) do
+            xml.template!(:object_type, remote_object_type)
+          end
+          xml.ids do
+            xml.template!(:int_array, [id])
+          end
+        end
+        
+        result = request(remote_service_method(:delete), xml_query)
+        result = result[remote_key_with_object(:delete_result)]
+        
+        if(result[:success] && result[:id].to_s == id.to_s)
+          [result[:id]]
         else
           handle_remote_exception(result)
         end

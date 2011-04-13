@@ -1,11 +1,7 @@
 require 'spec_helper'
 
 describe Eloqua::RemoteObject do
-  
-  def create_xml(&block)
-    subject.api.builder(&block)
-  end
-  
+    
   subject do
     Class.new(Eloqua::RemoteObject) do
       self.remote_object_type = Eloqua::API.remote_object_type('Contact')

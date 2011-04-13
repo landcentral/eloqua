@@ -1,17 +1,39 @@
-shared_examples_for "supports CURD remote operations" do |remote_type|
+# This is for testing the xml syntax given to the remote objects
+# Actual response tests (with fixtures) should be done in the 
+# Entity or Asset spec's
+
+shared_examples_for "supports CURD remote operations" do |remote_object|
   
   before do
-    @remote_type = remote_type
+    @remote_object = remote_object
   end
   
-  let(:remote_type) { @remote_type }
+  let(:remote_object) { @remote_object }
+  let(:email) { 'test@email.com' }
   
+  let(:dynamic_key) { ("dynamic_#{remote_object}".to_sym) }
+  let(:field_key) { "#{remote_object}_fields".to_sym }
+    
   context "#self.find" do
+    
+    let(:find_result) do
+      {
+        dynamic_key => {
+          :field_value_collection => {
+            field_key => [{
+              :internal_name => 'C_EmailAddress',
+              :value => email
+            }]
+          },
+          :id => '1'
+        }
+      }
+    end
     
     context "successful find with all fields" do
       let(:xml_body) do
-        create_xml do |xml|
-          xml.object_type_lower!(remote_type) do
+        xml! do |xml|
+          xml.object_type_lower!(remote_object) do
             xml.template!(:object_type, subject.remote_object_type)
           end
           xml.ids do
@@ -21,8 +43,7 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
       end
 
       before do
-        mock = soap_fixture(remote_method(:retrieve), :contact_single)
-        flexmock(subject.api).should_receive(:send_remote_request).with(:service, remote_method(:retrieve), xml_body).and_return(mock)
+        mock_api_request(remote_method(:retrieve), xml_body, find_result)                            
         @result = subject.find(1)
       end
 
@@ -32,12 +53,9 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
       
       it 'should should have populated attributes in object' do
         expected = {
-          :email_address => 'test@email.com',
-          :first_name => 'First',
-          :last_name => 'Last',
+          :email_address => email,
           :id => 1
         }
-        
         expected.each do |key, value|
           @result.send(key).should == value
         end
@@ -47,7 +65,10 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
       context 'find without a result' do
         
         before do
-          mock = mock_eloqua_request(remote_method(:retrieve), :contact_missing)
+          mock = mock_api_request({
+            dynamic_key => nil
+          })
+          
           @result = subject.find(5)
         end
         
@@ -63,16 +84,26 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
   
   context '#self.create_remote_object' do
     
+    let(:result_key) { subject.remote_key_with_object(:create_result) }    
     let(:input) { [{:C_EmailAddress => 'create'}] }
+    let(:create_result) do
+      {
+        result_key => {
+          ("#{remote_object}_type").to_sym => subject.remote_object_type,
+          :errors => nil,
+          :id => 1
+        }
+      }
+    end
     
     context 'when successfuly creating one record' do
       
       let(:xml_body) do
         api = subject.api
-        create_xml do |xml|
-          xml.entities do
-            xml.tag!(dynamic_type) do
-              xml.template!(:dynamic, remote_type, api.remote_object_type('Contact'), nil, {
+        xml! do |xml|
+          xml.object_collection!(remote_object) do
+            xml.dynamic_object!(remote_object) do
+              xml.template!(:dynamic, remote_object, subject.remote_object_type, nil, {
                 :C_EmailAddress => 'create',                
               })
             end
@@ -81,8 +112,7 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
       end
       
       before do
-        mock = soap_fixture(remote_method(:create), :contact_success)
-        flexmock(subject.api).should_receive(:send_remote_request).with(:service, remote_method(:create), xml_body).and_return(mock)
+        mock_api_request(remote_method(:create), xml_body, create_result)
         @results = subject.create_remote_object(*input)
       end
       
@@ -94,9 +124,23 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
     end
     
     context "when the record is duplicate" do
+      
+      let(:create_result) do
+        {
+          result_key => {
+            ("#{remote_object}_type").to_sym => subject.remote_object_type,
+            :errors => {
+              :error => {
+                :error_code => 'DuplicateValue',
+                :message => 'You are attempting to create a duplicate entity.'
+              }
+            }
+          }
+        }
+      end
+      
       before do
-        mock = soap_fixture(remote_method(:create), :contact_duplicate)
-        flexmock(subject.api).should_receive(:send_remote_request).and_return(mock)
+        mock_api_request(create_result)
       end
       
       it 'should raise duplicate error exception' do
@@ -109,14 +153,27 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
   
   context "#self.update_remote_object" do
     
+    
+    let(:result_key) { subject.remote_key_with_object(:update_result) }
+    
+    let(:update_result) do
+      {
+        result_key => {
+          ("#{remote_object}_type").to_sym => subject.remote_object_type,
+          :errors => nil,
+          :id => 1,
+          :success => true
+        }
+      }
+    end
+    
     context "when successfuly updating one record" do
       let(:input) { [1, {:C_EmailAddress => 'new'}] }
       let(:xml_body) do
-        api = subject.api
-        create_xml do |xml|
-          xml.entities do
-            xml.tag!(dynamic_type) do
-              xml.template!(:dynamic, remote_type, subject.remote_object_type, '1', {
+        xml! do |xml|
+          xml.object_collection!(remote_object) do
+            xml.dynamic_object!(remote_object) do
+              xml.template!(:dynamic, remote_object, subject.remote_object_type, '1', {
                 :C_EmailAddress => 'new',                
               })
             end
@@ -125,8 +182,7 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
       end
 
       before do
-        mock = soap_fixture(remote_method(:update), :contact_success)
-        flexmock(subject.api).should_receive(:send_remote_request).with(:service, remote_method(:update), xml_body).and_return(mock)
+        mock_api_request(remote_method(:update), xml_body, update_result)
         @results = subject.update_remote_object(*input)        
       end
       
@@ -134,6 +190,52 @@ shared_examples_for "supports CURD remote operations" do |remote_type|
         @results.should be_true
       end
       
+    end
+    
+  end
+  
+  context "#self.delete_remote_object" do
+    
+    context "when given single int" do
+      let(:result_key) { subject.remote_key_with_object(:delete_result) }
+      
+      let(:delete_result) do
+        {
+          result_key => {
+            ("#{remote_object}_type").to_sym => subject.remote_object_type,
+            :errors => nil,
+            :id => 1,
+            :success => true
+          }
+        }
+      end
+      let(:input) { 1 }
+      let(:xml_body) do
+        xml! do |xml|
+          xml.object_type_lower!(subject.remote_object) do
+            xml.template!(:object_type, subject.remote_object_type)
+          end
+          xml.ids do
+            xml.template!(:int_array, [input])
+          end
+        end
+      end
+      
+      before do
+        mock_api_request(remote_method(:delete), xml_body, delete_result)
+        @result = subject.delete_remote_object(1)
+      end
+      
+      it 'should return an array of deleted ids' do
+        @result.should == [1]
+      end
+      
+    end
+    
+    context 'when given an array' do
+      it 'should return an array of deleted ids' do
+        # Pending....
+      end
     end
     
   end

@@ -37,7 +37,17 @@ module Eloqua
           xml.arr(:int, element)
         end
       end
-
+      
+      # For use with add/remove membership
+      define_builder_template :object do |xml, object_type, type, id|
+        xml.tag!(object_type) do
+          xml.object_type!(object_type) do
+            xml.template!(:object_type, type)
+          end
+          xml.Id(id)
+        end
+      end
+      
       # For use with the entity function
       define_builder_template :object_type do |xml, object|
         xml.ID(object['ID'])

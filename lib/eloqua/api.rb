@@ -82,6 +82,7 @@ module Eloqua
 
       # Sends remote request and returns a response object
       def send_remote_request(type, name, soap_body = nil, &block)
+        raise([type, name, soap_body].inspect)
         client(type).request(:wsdl, name) do
           soap.namespaces["xmlns:arr"] = XML_NS_ARRAY
           soap.element_form_default = :qualified
