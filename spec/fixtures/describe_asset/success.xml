@@ -1,0 +1,72 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-04-13T17:31:54.936Z</u:Created>
+                        <u:Expires>2011-04-13T17:36:54.936Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <DescribeAssetResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <DescribeAssetResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <Fields>
+                              <DynamicAssetFieldDefinition>
+                                    <DataType>String</DataType>
+                                    <DisplayName>Name</DisplayName>
+                                    <InternalName>name</InternalName>
+                                    <IsRequired>true</IsRequired>
+                                    <IsWriteable>true</IsWriteable>
+                                    <Length>100</Length>
+                              </DynamicAssetFieldDefinition>
+                              <DynamicAssetFieldDefinition>
+                                    <DataType>String</DataType>
+                                    <DisplayName>Description</DisplayName>
+                                    <InternalName>description</InternalName>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>true</IsWriteable>
+                                    <Length>250</Length>
+                              </DynamicAssetFieldDefinition>
+                              <DynamicAssetFieldDefinition>
+                                    <DataType>String</DataType>
+                                    <DisplayName>Owner</DisplayName>
+                                    <InternalName>createdby</InternalName>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>false</IsWriteable>
+                                    <Length>50</Length>
+                              </DynamicAssetFieldDefinition>
+                              <DynamicAssetFieldDefinition>
+                                    <DataType>DateTime</DataType>
+                                    <DisplayName>Created Date</DisplayName>
+                                    <InternalName>createdat</InternalName>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>false</IsWriteable>
+                                    <Length>4</Length>
+                              </DynamicAssetFieldDefinition>
+                              <DynamicAssetFieldDefinition>
+                                    <DataType>String</DataType>
+                                    <DisplayName>Modified By</DisplayName>
+                                    <InternalName>modifiedby</InternalName>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>false</IsWriteable>
+                                    <Length>50</Length>
+                              </DynamicAssetFieldDefinition>
+                              <DynamicAssetFieldDefinition>
+                                    <DataType>DateTime</DataType>
+                                    <DisplayName>Modified Date</DisplayName>
+                                    <InternalName>modifiedat</InternalName>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>false</IsWriteable>
+                                    <Length>4</Length>
+                              </DynamicAssetFieldDefinition>
+                        </Fields>
+                        <IsCreateable>true</IsCreateable>
+                        <IsDeletable>true</IsDeletable>
+                        <IsQueryable>false</IsQueryable>
+                        <IsRetrievable>true</IsRetrievable>
+                        <IsUpdateable>true</IsUpdateable>
+                        <Name>Contact Group</Name>
+                  </DescribeAssetResult>
+            </DescribeAssetResponse>
+      </s:Body>
+</s:Envelope>

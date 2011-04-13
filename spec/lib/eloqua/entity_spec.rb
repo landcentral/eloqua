@@ -17,10 +17,6 @@ describe Eloqua::Entity do
     specify { subject.remote_object.should == :entity }        
   end
   
-  context '#self.remote_object_type_tag' do
-    specify { subject.remote_object_type_tag.should == 'entityType' }
-  end  
-  
   context "#self.build_query" do
     
     context "when using a string" do
@@ -142,8 +138,7 @@ describe Eloqua::Entity do
       
     end
     
-  end  
-  
+  end
   
   
 end

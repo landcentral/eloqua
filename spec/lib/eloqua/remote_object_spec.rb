@@ -513,6 +513,84 @@ describe Eloqua::RemoteObject do
     end        
   end
   
+  context "#self.remote_key_with_object" do
+
+     let(:klass) do
+       Class.new(subject) do
+
+       end
+     end
+
+     context "when remote_object == :entity" do
+
+       before do
+         klass.remote_object = :entity
+       end
+
+       specify { klass.remote_object.should == :entity }
+
+       it 'should return given name' do
+         klass.remote_key_with_object(:create_result).should == :create_result
+       end
+
+     end
+
+     context "when remote_object == :asset" do
+
+       before do
+         klass.remote_object = :asset
+       end
+
+       specify { klass.remote_object.should == :asset }
+
+       it 'should return given name' do
+         klass.remote_key_with_object(:create_result).should == :create_asset_result
+       end
+
+     end
+
+   end  
+
+   context "#self.remote_service_method" do
+
+     let(:klass) do
+       Class.new(subject) do
+
+       end
+     end
+
+     context "when remote_object == :entity" do
+
+       before do
+         klass.remote_object = :entity
+       end
+
+       specify { klass.remote_object.should == :entity }
+
+       it 'should return given name' do
+         klass.remote_service_method(:create).should == :create
+       end
+
+     end
+
+     context "when remote_object == :asset" do
+
+       before do
+         klass.remote_object = :asset
+       end
+
+       specify { klass.remote_object.should == :asset }
+
+       it 'should return given name' do
+         klass.remote_service_method(:create).should == :create_asset
+       end
+
+     end
+
+
+
+   end  
+  
   context '#self.primary_key' do
     it 'is "id" by default' do
       subject.primary_key.should == 'id'
@@ -532,7 +610,7 @@ describe Eloqua::RemoteObject do
     end
 
   end
-  
+    
   context "#self.api" do
     it 'should have api on the class level' do
       subject.api.should == Eloqua::API
@@ -551,84 +629,6 @@ describe Eloqua::RemoteObject do
       flexmock(subject.api).should_receive(:request).with(:service, :method, {})
       subject.request(:method, {})
     end
-  end
-  
-  context "#remote_key_with_object" do
-    
-    let(:klass) do
-      Class.new(subject) do
-        
-      end
-    end
-    
-    context "when remote_object == :entity" do
-      
-      before do
-        klass.remote_object = :entity
-      end
-      
-      specify { klass.remote_object.should == :entity }
-      
-      it 'should return given name' do
-        klass.remote_key_with_object(:create_result).should == :create_result
-      end
-      
-    end
-    
-    context "when remote_object == :asset" do
-      
-      before do
-        klass.remote_object = :asset
-      end
-      
-      specify { klass.remote_object.should == :asset }
-      
-      it 'should return given name' do
-        klass.remote_key_with_object(:create_result).should == :create_asset_result
-      end
-      
-    end
-    
-  end  
-  
-  context "#remote_service_method" do
-    
-    let(:klass) do
-      Class.new(subject) do
-        
-      end
-    end
-    
-    context "when remote_object == :entity" do
-      
-      before do
-        klass.remote_object = :entity
-      end
-      
-      specify { klass.remote_object.should == :entity }
-      
-      it 'should return given name' do
-        klass.remote_service_method(:create).should == :create
-      end
-      
-    end
-    
-    context "when remote_object == :asset" do
-      
-      before do
-        klass.remote_object = :asset
-      end
-      
-      specify { klass.remote_object.should == :asset }
-      
-      it 'should return given name' do
-        klass.remote_service_method(:create).should == :create_asset
-      end
-      
-    end
-    
-    
-    
   end
   
   context "#self.handle_remote_errors" do

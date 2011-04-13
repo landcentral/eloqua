@@ -14,7 +14,40 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
   let(:dynamic_key) { ("dynamic_#{remote_object}".to_sym) }
   let(:field_key) { "#{remote_object}_fields".to_sym }
   
-  context '#self.list_types' do
+  context "#list_types" do
+    let(:remote_method) { "list_#{remote_object}_types".to_sym }
+    
+    before do
+      mock_eloqua_request(remote_method, :success).with(:service, remote_method, nil)
+    end
+        
+    it 'should return results as an array' do
+      result = subject.list_types
+      result.class.should == Array
+    end
+        
+  end
+    
+  context "#describe" do
+    let(:remote_method) { "describe_#{remote_object}".to_sym }    
+    
+    let(:xml_body) do
+      xml! do |xml|
+        xml.object_type_lower!(remote_object) do
+          xml.template!(:object_type, subject.remote_object_type)
+        end
+      end
+    end
+    
+    before do
+      mock_eloqua_request(remote_method, :success).with(:service, remote_method, xml_body)
+      @result = subject.describe
+    end
+    
+    it 'should have fields in the top level in result as an array' do
+      @result.should have_key(:fields)
+      @result[:fields].class.should == Array
+    end
     
   end
     

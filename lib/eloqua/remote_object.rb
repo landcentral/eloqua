@@ -199,6 +199,23 @@ module Eloqua
         end
       end
 
+      def remote_service_method(method)
+        if(remote_object == :entity)
+          method.to_sym
+        else
+          "#{method}_#{remote_object}".to_sym
+        end
+      end
+            
+      def remote_key_with_object(name)
+        if(remote_object == :entity)
+          name.to_sym
+        else
+          parts = name.to_s.split('_')
+          "#{parts[0]}_#{remote_object}_#{parts[1]}".to_sym
+        end
+      end
+      
       def api
         Eloqua::API
       end
@@ -209,6 +226,33 @@ module Eloqua
 
       def request(method, *args)
         api.request(:service, method, *args)
+      end
+      
+      def describe
+        xml_query = api.builder do |xml|
+          xml.object_type_lower!(remote_object) do
+            xml.template!(:object_type, remote_object_type)
+          end
+        end
+        remote_method = "describe_#{remote_object}".to_sym
+        result = request(remote_method, xml_query)
+        if(result)
+          field_describe_key = "dynamic_#{remote_object}_field_definition".to_sym
+          fields = result[:fields]
+          if(fields.is_a?(Hash) && fields.has_key?(field_describe_key))
+            result[:fields] = fields[field_describe_key]
+          end
+        end
+        result
+      end
+      
+      
+      def list_types
+        types = "#{remote_object}_types".to_sym
+        result = request("list_#{types}".to_sym)
+        if(result && result[types])
+          result[types][:string]
+        end
       end
       
       # Eloqua CAN find multiple records from retrieve
@@ -241,32 +285,7 @@ module Eloqua
           false
         end
       end
-      
-      def remote_service_method(method)
-        if(remote_object == :entity)
-          method.to_sym
-        else
-          "#{method}_#{remote_object}".to_sym
-        end
-      end
-      
-      def remote_object_type_tag
-        "#{remote_object}Type"
-      end
-      
-      def remote_key_with_object(name)
-        if(remote_object == :entity)
-          name.to_sym
-        else
-          parts = name.to_s.split('_')
-          "#{parts[0]}_#{remote_object}_#{parts[1]}".to_sym
-        end
-      end
-      
-      def dynamic_tag
-        "Dynamic#{remote_object.to_s.camelize}".to_sym
-      end
-            
+                  
       def create_remote_object(attributes)
         xml_query = api.builder do |xml|
           xml.object_collection!(remote_object) do

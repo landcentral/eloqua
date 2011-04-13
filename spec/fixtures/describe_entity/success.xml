@@ -1,0 +1,54 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-04-13T17:28:41.525Z</u:Created>
+                        <u:Expires>2011-04-13T17:33:41.525Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <DescribeEntityResponse xmlns="https://secure.eloqua.com/API/1.2">
+                  <DescribeEntityResult xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                        <Fields>
+                              <DynamicEntityFieldDefinition>
+                                    <DataType>Text</DataType>
+                                    <DefaultValue i:nil="true"/>
+                                    <DisplayName>Email Address</DisplayName>
+                                    <InternalName>C_EmailAddress</InternalName>
+                                    <IsCustom>false</IsCustom>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>true</IsWriteable>
+                                    <Length>100</Length>
+                              </DynamicEntityFieldDefinition>
+                              <DynamicEntityFieldDefinition>
+                                    <DataType>Text</DataType>
+                                    <DefaultValue i:nil="true"/>
+                                    <DisplayName>First Name</DisplayName>
+                                    <InternalName>C_FirstName</InternalName>
+                                    <IsCustom>false</IsCustom>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>true</IsWriteable>
+                                    <Length>100</Length>
+                              </DynamicEntityFieldDefinition>
+                              <DynamicEntityFieldDefinition>
+                                    <DataType>Text</DataType>
+                                    <DefaultValue i:nil="true"/>
+                                    <DisplayName>Last Name</DisplayName>
+                                    <InternalName>C_LastName</InternalName>
+                                    <IsCustom>false</IsCustom>
+                                    <IsRequired>false</IsRequired>
+                                    <IsWriteable>true</IsWriteable>
+                                    <Length>100</Length>
+                              </DynamicEntityFieldDefinition>
+                        </Fields>
+                        <IsCreateable>true</IsCreateable>
+                        <IsDeletable>true</IsDeletable>
+                        <IsQueryable>true</IsQueryable>
+                        <IsRetrievable>true</IsRetrievable>
+                        <IsUpdateable>true</IsUpdateable>
+                        <Name i:nil="true"/>
+                  </DescribeEntityResult>
+            </DescribeEntityResponse>
+      </s:Body>
+</s:Envelope>
