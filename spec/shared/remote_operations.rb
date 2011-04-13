@@ -13,6 +13,10 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
   
   let(:dynamic_key) { ("dynamic_#{remote_object}".to_sym) }
   let(:field_key) { "#{remote_object}_fields".to_sym }
+  
+  context '#self.list_types' do
+    
+  end
     
   context "#self.find" do
     

@@ -1,10 +1,39 @@
 require 'spec_helper'
 
+shared_examples_for "entity association operation" do  |method|
+  
+  before do
+    flexmock(subject).should_receive(:entity_asset_operation).with(method, 1, entity, 1).once.returns(true)
+  end
+  
+  it 'should use entity asset operation to make request' do
+    subject.send(method, 1, entity, 1)
+  end
+  
+end
+
+shared_examples_for "entity association with response" do |type, name|
+  
+  let(:xml_body) do
+    subject.entity_association_xml(1, entity, 1)
+  end
+  
+  before do
+    mock_eloqua_request(type, name).\
+      with(:service, type, xml_body).once
+
+    @result = asset.entity_asset_operation(type, 1, entity, 1)
+  end
+  
+  specify { @result.should be_true }
+  
+end
+
 describe Eloqua::Asset do
   
   subject do
     Class.new(Eloqua::Asset) do
-      self.remote_object_type = Eloqua::API.remote_object_type('ContactGroup')
+      self.remote_object_type = Eloqua::API.remote_object_type('ContactGroupName', 'ContactGroup', 0)
       def self.name
         'ContactGroup'
       end
@@ -35,47 +64,27 @@ describe Eloqua::Asset do
       asset.entity_association_xml(1, entity, 1)
     end
     
-    context "#self.add_group_member" do
-                  
-      before do        
-        mock = soap_fixture(:add_group_member, :success);
-        
-        flexmock(Eloqua::API).\
-          should_receive(:send_remote_request).\
-          with(:service, :add_group_member, xml_body).\
-          returns(mock).once
-        
-        @result = asset.add_group_member(1, entity, 1)
-      end
+    context "#self.entity_asset_operation" do
       
-      it 'should return true' do
-        @result.should be_true
+      context "when adding group member" do
+        it_behaves_like 'entity association with response', :add_group_member, :success
       end
 
+      context "when removing group member" do
+        it_behaves_like 'entity association with response', :remove_group_member, :success
+      end
+      
     end
-
-    context "#self.remove_group_member" do
-      
-      before do
-        mock = soap_fixture(:remove_group_member, :success);
-        
-        flexmock(Eloqua::API).\
-          should_receive(:send_remote_request).\
-          with(:service, :remove_group_member, xml_body).\
-          returns(mock).once
-        
-        @result = asset.remove_group_member(1, entity, 1)
-      end
-      
-      it 'should return true' do
-        @result.should be_true
-      end
-      
-    end    
     
+    context "#self.add_group_member" do
+      it_behaves_like 'entity association operation', :add_group_member
+    end
+    
+    context "#self.remove_group_member" do
+      it_behaves_like 'entity association operation', :remove_group_member      
+    end
+      
   end
-  
-
   
   context "#self.entity_association_xml" do
     

@@ -6,6 +6,18 @@ module Eloqua
     
     self.remote_object = :entity
     
+    def add_membership
+      
+    end
+    
+    def remove_membership
+      
+    end
+    
+    def list_memberships
+      
+    end
+    
     class << self
       # This method does ~NOT~ sanitize input like active record does
       def build_query(where)

@@ -19,23 +19,9 @@ module Eloqua
         end
       end
       
-      # Adds entity to this Asset
-      def add_group_member(asset_id, entity, entity_id)
+      def entity_asset_operation(request_method, asset_id, entity, entity_id)
         xml_query = entity_association_xml(asset_id, entity, entity_id)
-        result = request(:add_group_member, xml_query)
-        if(result[:success])
-          true
-        elsif(result[:errors])
-          handle_remote_exception(result)
-        else
-          false
-        end
-      end
-      
-      # Removes entity to this Asset
-      def remove_group_member(asset_id, entity, entity_id)
-        xml_query = entity_association_xml(asset_id, entity, entity_id)
-        result = request(:remove_group_member, xml_query)
+        result = request(request_method.to_sym, xml_query)
         if(result[:success])
           true
         elsif(result[:errors])
@@ -43,6 +29,16 @@ module Eloqua
         else
           false
         end        
+      end
+      
+      # Adds entity to this Asset
+      def add_group_member(asset_id, entity, entity_id)
+        entity_asset_operation(:add_group_member, asset_id, entity, entity_id)
+      end
+      
+      # Removes entity to this Asset
+      def remove_group_member(asset_id, entity, entity_id)
+        entity_asset_operation(:remove_group_member, asset_id, entity, entity_id)     
       end
       
     end
