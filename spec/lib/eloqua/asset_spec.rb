@@ -55,6 +55,37 @@ describe Eloqua::Asset do
       self.remote_object_type = Eloqua::API.remote_object_type('Contact')
     end    
   end
+
+  context "#self.describe_type" do
+    
+    shared_examples_for "with results from" do |name|
+      let(:request_hash) do
+        {:asset_type => 'Type'}
+      end
+
+      before do
+        mock_eloqua_request(:describe_asset_type, name).\
+          with(:service, :describe_asset_type, request_hash).once
+        @result = asset.describe_type('Type')
+      end
+
+      it "results from (#{name}}) should return an array of asset types" do
+        @result.class.should == Array
+      end
+
+      it "results from (#{name}}) should have :id, :name and :type fields" do
+        first = @result.first
+
+        first.should have_key(:id)
+        first.should have_key(:name)
+        first.should have_key(:type)
+      end
+    end    
+    
+    it_behaves_like 'with results from', :single
+    it_behaves_like 'with results from', :multiple
+    
+  end
   
   it_behaves_like 'supports CURD remote operations', :asset
   
@@ -85,6 +116,8 @@ describe Eloqua::Asset do
     end
       
   end
+  
+  
   
   context "#self.entity_association_xml" do
     

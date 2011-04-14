@@ -11,7 +11,57 @@ describe Eloqua::Entity do
     end
   end
   
+  let(:object) do
+    subject.new({:id => 1}, :remote)
+  end
+  
   it_behaves_like 'supports CURD remote operations', :entity
+  
+  context "#add_membership" do
+    it 'should delegate call to asset class' do
+      flexmock(Eloqua::Asset).should_receive(:add_group_member).\
+        with(5, object.remote_object_type, object.id).once
+
+      object.add_membership(5)
+    end
+  end
+  
+  context "#remove_membership" do
+    it 'should delegate call to asset class' do
+      flexmock(Eloqua::Asset).should_receive(:remove_group_member).\
+        with(5, object.remote_object_type, object.id).once
+      object.remove_membership(5)
+    end    
+  end
+  
+  context "#list_memberships" do
+    
+    it 'should delegate call to class level with current id' do
+      flexmock(subject).should_receive(:list_memberships).with(1).once
+      object.list_memberships
+    end
+    
+  end
+  
+  context "#self.list_memberships" do
+    let(:xml_body) do
+      xml! do |xml|
+        xml.template!(:object, :entity, subject.remote_object_type, 1)
+      end
+    end
+    
+    before do
+      mock_eloqua_request(:list_group_membership, :success).\
+        with(:service, :list_group_membership, xml_body).once
+        
+      @result = subject.list_memberships(1)
+    end
+    
+    it "should provide array of contact groups" do
+      pp @result
+    end
+    
+  end
   
   context "#self.remote_object" do
     specify { subject.remote_object.should == :entity }        

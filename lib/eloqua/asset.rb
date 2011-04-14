@@ -8,6 +8,11 @@ module Eloqua
     
     class << self
       
+      def describe_type(type)
+        result = request(:describe_asset_type, :asset_type => type)
+        format_results_for_array(result, :asset_types, :asset_type)
+      end
+      
       def entity_association_xml(asset_id, entity, entity_id)
         if(entity.is_a?(Class) && entity.ancestors.include?(Eloqua::RemoteObject))
           entity = entity.remote_object_type
