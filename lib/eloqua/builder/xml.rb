@@ -50,9 +50,9 @@ module Eloqua
       
       # For use with the entity function
       define_builder_template :object_type do |xml, object|
-        xml.ID(object['ID'])
-        xml.Name(object['Name'])
-        xml.Type(object['Type'])
+        xml.ID(object[:id])
+        xml.Name(object[:name])
+        xml.Type(object[:type])
       end
 
       # defines entity attribute fields for use in update/create

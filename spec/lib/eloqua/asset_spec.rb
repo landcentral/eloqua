@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-shared_examples_for "entity association operation" do  |method|
+shared_examples_for "asset entity association operation" do  |method|
   
   before do
     flexmock(subject).should_receive(:entity_asset_operation).with(method, 1, entity, 1).once.returns(true)
@@ -12,7 +12,7 @@ shared_examples_for "entity association operation" do  |method|
   
 end
 
-shared_examples_for "entity association with response" do |type, name|
+shared_examples_for "asset entity association with response" do |type, name|
   
   let(:xml_body) do
     subject.entity_association_xml(1, entity, 1)
@@ -33,7 +33,7 @@ describe Eloqua::Asset do
   
   subject do
     Class.new(Eloqua::Asset) do
-      self.remote_object_type = Eloqua::API.remote_object_type('ContactGroupName', 'ContactGroup', 0)
+      self.remote_object_type = Eloqua::Api.remote_object_type('ContactGroupName', 'ContactGroup', 0)
       def self.name
         'ContactGroup'
       end
@@ -44,7 +44,7 @@ describe Eloqua::Asset do
   
   let(:asset) do
     Class.new(subject) do
-      self.remote_object_type = Eloqua::API.remote_object_type('ContactGroupName', 'ContactGroup', 0)
+      self.remote_object_type = Eloqua::Api.remote_object_type('ContactGroupName', 'ContactGroup', 0)
       map :name => :name
       map :description => :description
     end
@@ -52,7 +52,7 @@ describe Eloqua::Asset do
   
   let(:entity) do
     Class.new(Eloqua::Entity) do
-      self.remote_object_type = Eloqua::API.remote_object_type('Contact')
+      self.remote_object_type = Eloqua::Api.remote_object_type('Contact')
     end    
   end
 
@@ -82,8 +82,7 @@ describe Eloqua::Asset do
       end
     end    
     
-    it_behaves_like 'with results from', :single
-    it_behaves_like 'with results from', :multiple
+    it_behaves_like 'with results from', :success
     
   end
   
@@ -98,21 +97,21 @@ describe Eloqua::Asset do
     context "#self.entity_asset_operation" do
       
       context "when adding group member" do
-        it_behaves_like 'entity association with response', :add_group_member, :success
+        it_behaves_like 'asset entity association with response', :add_group_member, :success
       end
 
       context "when removing group member" do
-        it_behaves_like 'entity association with response', :remove_group_member, :success
+        it_behaves_like 'asset entity association with response', :remove_group_member, :success
       end
       
     end
     
     context "#self.add_group_member" do
-      it_behaves_like 'entity association operation', :add_group_member
+      it_behaves_like 'asset entity association operation', :add_group_member
     end
     
     context "#self.remove_group_member" do
-      it_behaves_like 'entity association operation', :remove_group_member      
+      it_behaves_like 'asset entity association operation', :remove_group_member
     end
       
   end

@@ -40,7 +40,12 @@ class Eloqua::Entity
   include Eloqua::ApiDelegation
 
   self << class
-    delegate_to_api(Eloqua::Api::Service, :remote_group, :  )
+    delegate_to_api(Eloqua::Api::Service, :remote_group, :remote_type)
+    delegate_methods_to_api(
+        :update_object,
+        :delete_object,
+        :
+    )
   end
 
 end

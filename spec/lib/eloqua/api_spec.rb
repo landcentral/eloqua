@@ -89,15 +89,15 @@ describe Eloqua::Api do
     end
 
     it "should have an ID of 0" do
-      @entity['ID'].should == 0
+      @entity[:id].should == 0
     end
 
     it "should have a Name equal to Contact" do
-      @entity['Name'].should == 'Contact'
+      @entity[:name].should == 'Contact'
     end
 
     it "should have Type equal to Base" do
-      @entity['Type'].should == 'Base'
+      @entity[:type].should == 'Base'
     end
 
   end

@@ -57,9 +57,9 @@ module Eloqua
 
       def remote_object_type(name, type = 'Base', id = 0)
         {
-          'Name' => name,
-          'Type' => type,
-          'ID' => id
+          :name => name,
+          :type => type,
+          :id => id
         }
       end
 

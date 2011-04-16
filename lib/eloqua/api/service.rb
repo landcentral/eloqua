@@ -8,7 +8,7 @@ module Eloqua
       class << self
 
         delegate :builder, :remote_object_type, :to => Eloqua::Api
-
+        
         def entity_association_xml(asset_type, asset_id, entity, entity_id)
           xml_query = builder do |xml|
             xml.template!(:object, :entity, entity, entity_id)
@@ -16,6 +16,7 @@ module Eloqua
           end
         end
 
+        # Delegate Group
         def key_with_object(group, name)
           if (group == :entity)
             name.to_sym
@@ -25,6 +26,7 @@ module Eloqua
           end
         end
 
+        # Delegate Group
         def object_method(group, method)
           if (group == :entity)
             method.to_sym
@@ -37,6 +39,7 @@ module Eloqua
           Eloqua::Api.request(:service, *args)
         end
 
+        # Delegate, Group, Type
         def create_object(group, type, attributes)
           xml_query = builder do |xml|
             xml.object_collection!(group) do
@@ -56,6 +59,7 @@ module Eloqua
           end
         end
 
+        # Delegate Group, Type
         def update_object(group, type, entity_id, attributes)
           xml_query = builder do |xml|
             xml.object_collection!(group) do
@@ -75,6 +79,7 @@ module Eloqua
           end
         end
 
+        # Delegate Group, Type
         def delete_object(group, type, id)
           xml_query = builder do |xml|
             xml.object_type_lower!(group) do
@@ -95,6 +100,7 @@ module Eloqua
           end
         end
 
+        # Delegate Group, Type
         def find_object(group, type, id)
           xml_query = builder do |xml|
             xml.object_type_lower!(group) do
@@ -123,13 +129,14 @@ module Eloqua
           end
         end
 
+        # Delegate Type
         def list_memberships(entity_type, entity_id)
           xml_query = builder do |xml|
             xml.template!(:object, :entity, entity_type, entity_id)
           end
           results = request(:list_group_membership, xml_query)
           results = results[:dynamic_asset]
-          memberships = results.inject([]) do |map, object|
+          results.inject([]) do |map, object|
             map << object[:asset_type]
             map
           end
@@ -155,6 +162,7 @@ module Eloqua
           entity_asset_operation(:remove_group_member, asset_type, asset_id, entity_type, entity_id)
         end
 
+        # Delegate Group
         def list_types(group)
           types = "#{group}_types".to_sym
           result = request("list_#{types}".to_sym)
@@ -163,6 +171,7 @@ module Eloqua
           end
         end
 
+        # Delegate Group, Type
         def describe(group, type)
           xml_query = builder do |xml|
             xml.object_type_lower!(group) do
@@ -181,6 +190,7 @@ module Eloqua
           result
         end
 
+        # Delegate Group, Type
         def describe_type(group, type_name)
           key_type = "#{group}_type".to_sym
           key_types = "#{key_type}s".to_sym
