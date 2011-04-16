@@ -4,7 +4,7 @@ describe Eloqua::RemoteObject do
     
   subject do
     Class.new(Eloqua::RemoteObject) do
-      self.remote_object_type = Eloqua::API.remote_object_type('Contact')
+      self.remote_object_type = Eloqua::Api.remote_object_type('Contact')
       self.remote_object = :entity
       
       def self.name
@@ -675,7 +675,7 @@ describe Eloqua::RemoteObject do
     
   context "#self.api" do
     it 'should have api on the class level' do
-      subject.api.should == Eloqua::API
+      subject.api.should == Eloqua::Api
     end
   end
 

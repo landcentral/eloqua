@@ -9,7 +9,7 @@ require 'eloqua/exceptions'
 
 module Eloqua
 
-  class API
+  class Api
 
     # The namespace for Eloqua Array objects
     XML_NS_ARRAY = 'http://schemas.microsoft.com/2003/10/Serialization/Arrays'

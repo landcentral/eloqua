@@ -11,7 +11,7 @@ describe Eloqua do
     end
   end
   
-  context '#authenicate' do
+  context '#self.authenticate' do
     before do
       Eloqua.authenticate('user', 'pass')
     end
@@ -24,6 +24,64 @@ describe Eloqua do
       Eloqua.password.should == 'pass'
     end
     
+  end
+
+  context "#self.format_results_for_array" do
+    context "level 1 depth ending in single" do
+      let(:input) do
+        {
+          :one => :hit
+        }
+      end
+
+      let(:expected) { [:hit] }
+
+      it 'should return expected' do
+        result = subject.format_results_for_array(input, :one)
+        result.should == expected
+      end
+
+    end
+
+    context "level 3 depth ending in multiple" do
+
+      let(:input) do
+        {
+          :one => {
+            :two => {
+              :three => [:hit, :hit]
+            }
+          }
+        }
+      end
+
+      let(:expected) { [:hit, :hit] }
+
+      it 'should return expected' do
+        result = subject.format_results_for_array(input, :one, :two, :three)
+        result.should == expected
+      end
+    end
+
+    context "level 3 depth ending in single" do
+
+      let(:input) do
+        {
+          :one => {
+            :two => {
+              :three => [:hit]
+            }
+          }
+        }
+      end
+
+      let(:expected) { [:hit] }
+
+      it 'should return expected' do
+        result = subject.format_results_for_array(input, :one, :two, :three)
+        result.should == expected
+      end
+    end
   end
 
 end

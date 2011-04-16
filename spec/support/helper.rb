@@ -7,10 +7,10 @@ module Eloqua
         httpi = HTTPI::Response.new(code, headers, body)
         Savon::SOAP::Response.new(httpi)
       end
-
+  
       def mock_eloqua_request(type, name, code = 200, headers = {})
         mock = soap_fixture(type, name, code, headers)
-        flexmock(Eloqua::API).should_receive(:send_remote_request).returns(mock)
+        flexmock(Eloqua::Api).should_receive(:send_remote_request).returns(mock)
       end
                         
       def mock_api_request(method = nil, xml_body = nil, result = nil)
@@ -28,26 +28,30 @@ module Eloqua
       end
       
       def xml!(&block)
-        subject.api.builder(&block)
+        Eloqua::Api.builder(&block)
+      end
+
+      def group_name
+        (respond_to?(:remote_object))? remote_object : group
       end
       
       def remote_object_type
-        "#{remote_object}Type"
+        "#{group_name}Type"
       end
 
       def dynamic_type
-        "Dynamic#{remote_object.to_s.camelize}"
+        "Dynamic#{group_name.to_s.camelize}"
       end
 
       def tag_with_type(tag)
-        "#{tag}_#{remote_object}".to_sym
+        "#{tag}_#{group_name}".to_sym
       end
 
       def remote_method(method)
-        if(remote_object == :entity)
+        if(group_name == :entity)
           method.to_sym
         else
-          ("#{method}_#{remote_object}").to_sym
+          ("#{method}_#{group_name}").to_sym
         end
       end 
       

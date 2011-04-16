@@ -2,9 +2,9 @@ require 'spec_helper'
 require 'pp'
 
 
-describe Eloqua::API do
+describe Eloqua::Api do
 
-  subject { Eloqua::API }
+  subject { Eloqua::Api }
 
   before do
     subject.reset_clients

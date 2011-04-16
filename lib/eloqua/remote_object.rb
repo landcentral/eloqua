@@ -232,7 +232,7 @@ module Eloqua
       end
       
       def api
-        Eloqua::API
+        Eloqua::Api
       end
 
       def client

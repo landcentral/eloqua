@@ -4,7 +4,7 @@ describe Eloqua::Entity do
   
   subject do
     Class.new(Eloqua::Entity) do
-      self.remote_object_type = Eloqua::API.remote_object_type('Contact')
+      self.remote_object_type = Eloqua::Api.remote_object_type('Contact')
       def self.name
         'ContactEntity'
       end
