@@ -193,21 +193,6 @@ module Eloqua
             
       # Attribute types
       
-      def format_results_for_array(results, *keys)
-        max_depth = keys.length
-        depth = 0
-        keys.each do |key|
-          if(results.has_key?(key))
-            depth += 1
-            results = results[key]
-          end
-        end
-        if(depth == max_depth && !results.is_a?(Array))
-          results = [results]
-        end
-        results
-      end
-
       def attr_type_hash(name)
         {
           :type => name.to_sym,

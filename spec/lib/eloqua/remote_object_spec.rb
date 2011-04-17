@@ -23,7 +23,7 @@ describe Eloqua::RemoteObject do
   end
   
   it_behaves_like 'uses attribute map'
-  it_behaves_like 'supports CURD remote operations', :entity
+  it_behaves_like 'class level delegation of remote operations for', :entity
 
   context "#initialize" do
 
@@ -511,67 +511,6 @@ describe Eloqua::RemoteObject do
       let(:object) { klass.new(:california => false) }
       specify { object.attributes[:california].should == false }
     end        
-  end
-  
-  context "#self.format_results_for_array" do
-    
-    context "level 1 depth ending in single" do
-      
-      let(:input) do
-        {
-          :one => :hit
-        }
-      end
-      
-      let(:expected) { [:hit] }
-      
-      it 'should return expected' do
-        result = subject.format_results_for_array(input, :one)
-        result.should == expected
-      end      
-      
-    end 
-    
-    context "level 3 depth ending in multiple" do
-      
-      let(:input) do
-        {
-          :one => {
-            :two => {
-              :three => [:hit, :hit]
-            }
-          }
-        }
-      end
-
-      let(:expected) { [:hit, :hit] }
-
-      it 'should return expected' do
-        result = subject.format_results_for_array(input, :one, :two, :three)
-        result.should == expected
-      end    
-    end
-    
-    context "level 3 depth ending in single" do
-      
-      let(:input) do
-        {
-          :one => {
-            :two => {
-              :three => [:hit]
-            }
-          }
-        }
-      end
-
-      let(:expected) { [:hit] }
-
-      it 'should return expected' do
-        result = subject.format_results_for_array(input, :one, :two, :three)
-        result.should == expected
-      end    
-    end    
-                
   end
 
   context '#self.primary_key' do

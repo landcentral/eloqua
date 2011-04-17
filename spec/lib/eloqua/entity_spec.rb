@@ -15,7 +15,7 @@ describe Eloqua::Entity do
     subject.new({:id => 1}, :remote)
   end
   
-  it_behaves_like 'supports CURD remote operations', :entity
+  it_behaves_like 'class level delegation of remote operations for', :entity
 
   context "#list_memberships" do
     
@@ -25,27 +25,7 @@ describe Eloqua::Entity do
     end
     
   end
-  
-  context "#self.list_memberships" do
-    let(:xml_body) do
-      xml! do |xml|
-        xml.template!(:object, :entity, subject.remote_object_type, 1)
-      end
-    end
-    
-    before do
-      mock_eloqua_request(:list_group_membership, :success).\
-        with(:service, :list_group_membership, xml_body).once
 
-      @result = subject.list_memberships(1)
-    end
-    
-    it "should provide array of contact groups" do
-      #pp @result
-    end
-    
-  end
-  
   context "#self.remote_object" do
     specify { subject.remote_object.should == :entity }        
   end

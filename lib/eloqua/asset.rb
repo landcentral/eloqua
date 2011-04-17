@@ -6,10 +6,6 @@ module Eloqua
     
     self.remote_object = :asset
     
-    class << self
-      
-    end
-    
   end
   
 end
