@@ -24,7 +24,7 @@ module Eloqua
 
     delegate :api, :to => self
 
-    class_attribute :primary_key, :remote_object_type, :attribute_types, :remote_object
+    class_attribute :primary_key, :remote_object_type, :attribute_types, :remote_group
     
     attr_reader :attributes
 
@@ -34,11 +34,11 @@ module Eloqua
     self.remote_object_type = nil
 
     Eloqua.delegate_with_args(
-        self, Eloqua::Api::Service, Eloqua::Api::Service.group_methods, [:remote_object]
+        self, Eloqua::Api::Service, Eloqua::Api::Service.group_methods, [:remote_group]
     )
 
     Eloqua.delegate_with_args(
-        self, Api::Service, Api::Service.group_type_methods, [:remote_object, :remote_object_type]
+        self, Api::Service, Api::Service.group_type_methods, [:remote_group, :remote_object_type]
     )
     Eloqua.delegate_with_args(
         self, Api::Service, Api::Service.type_methods, [:remote_object_type]

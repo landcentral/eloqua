@@ -5,7 +5,7 @@ describe Eloqua::RemoteObject do
   subject do
     Class.new(Eloqua::RemoteObject) do
       self.remote_object_type = Eloqua::Api.remote_object_type('Contact')
-      self.remote_object = :entity
+      self.remote_group = :entity
       
       def self.name
         'ContactEntity'
@@ -18,8 +18,8 @@ describe Eloqua::RemoteObject do
     subject.api.remote_object_type('Contact')
   end
   
-  context "#self.remote_object" do
-    specify { subject.remote_object.should == :entity }        
+  context "#self.remote_group" do
+    specify { subject.remote_group.should == :entity }
   end
   
   it_behaves_like 'uses attribute map'

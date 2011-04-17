@@ -56,7 +56,7 @@ describe Eloqua::Asset do
 
   end
   
-  specify { subject.remote_object.should == :asset }
+  specify { subject.remote_group.should == :asset }
 
   it_behaves_like 'class level delegation of remote operations for', :asset
 

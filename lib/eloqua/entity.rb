@@ -4,7 +4,7 @@ module Eloqua
   
   class Entity < RemoteObject
     
-    self.remote_object = :entity
+    self.remote_group = :entity
 
     def list_memberships
       self.class.list_memberships(id)

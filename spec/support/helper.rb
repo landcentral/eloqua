@@ -38,7 +38,7 @@ module Eloqua
       end
 
       def group_name
-        (respond_to?(:remote_object))? remote_object : group
+        (respond_to?(:remote_group))? remote_group : group
       end
       
       def remote_object_type

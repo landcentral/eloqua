@@ -4,7 +4,7 @@ module Eloqua
   
   class Asset < RemoteObject
     
-    self.remote_object = :asset
+    self.remote_group = :asset
 
     def add_member(entity)
       member_operation(:add_group_member, entity)

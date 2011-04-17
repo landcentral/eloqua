@@ -58,8 +58,8 @@ describe Eloqua::Entity do
     end
   end
 
-  context "#self.remote_object" do
-    specify { subject.remote_object.should == :entity }        
+  context "#self.remote_group" do
+    specify { subject.remote_group.should == :entity }
   end
   
   context "#self.build_query" do
