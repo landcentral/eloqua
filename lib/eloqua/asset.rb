@@ -23,7 +23,7 @@ module Eloqua
       unless (entity.persisted?)
         raise(ArgumentError, "Cannot add member Entity has not been saved. (!entity.persisted?")
       end
-      api.send(method, remote_object_type, id, entity.remote_object_type, entity.id)
+      api.send(method, remote_type, id, entity.remote_type, entity.id)
     end
 
   end

@@ -4,7 +4,7 @@ describe Eloqua::Entity do
   
   subject do
     Class.new(Eloqua::Entity) do
-      self.remote_object_type = Eloqua::Api.remote_object_type('Contact')
+      self.remote_type = Eloqua::Api.remote_type('Contact')
       def self.name
         'ContactEntity'
       end
@@ -13,7 +13,7 @@ describe Eloqua::Entity do
 
   let(:asset) do
     Class.new(Eloqua::Asset) do
-      self.remote_object_type = api.remote_object_type('0', 'ContactGroup', '0')
+      self.remote_type = api.remote_type('0', 'ContactGroup', '0')
     end
   end
   
@@ -53,7 +53,7 @@ describe Eloqua::Entity do
 
   context "#self.list_memberships" do
     it 'should delegate call to api' do
-      flexmock(subject.api).should_receive(:list_memberships).with(subject.remote_object_type, 1).once
+      flexmock(subject.api).should_receive(:list_memberships).with(subject.remote_type, 1).once
       subject.list_memberships(1)
     end
   end
@@ -121,7 +121,7 @@ describe Eloqua::Entity do
         api = subject.api
         xml! do |xml|
           xml.eloquaType do
-            xml.template!(:object_type, api.remote_object_type('Contact'))
+            xml.template!(:object_type, api.remote_type('Contact'))
           end
           xml.searchQuery("C_EmailAddress='james@lightsofapollo.com'")
           xml.pageNumber(1)
@@ -166,7 +166,7 @@ describe Eloqua::Entity do
         
         xml! do |xml|
           xml.eloquaType do
-            xml.template!(:object_type, api.remote_object_type('Contact'))
+            xml.template!(:object_type, api.remote_type('Contact'))
           end
           xml.searchQuery("C_EmailAddress='james@lightsofapollo.com'")
           xml.pageNumber(1)

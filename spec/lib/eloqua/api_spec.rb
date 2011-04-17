@@ -77,10 +77,10 @@ describe Eloqua::Api do
 
   end
 
-  context "#remote_object_type" do
+  context "#remote_type" do
 
     before do
-      @entity = subject.remote_object_type('Contact')
+      @entity = subject.remote_type('Contact')
     end
 
     it "should be a hash" do

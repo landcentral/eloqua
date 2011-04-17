@@ -55,7 +55,7 @@ module Eloqua
         Eloqua::Builder::Xml.create(:namespace => :wsdl, &block)
       end
 
-      def remote_object_type(name, type = 'Base', id = 0)
+      def remote_type(name, type = 'Base', id = 0)
         {
           :name => name,
           :type => type,

@@ -31,7 +31,7 @@ shared_examples_for "class level delegation of remote operations for" do |remote
     context "#self.#{method}" do
       it "should delegate #{method} to Eloqua::Api::Service with group name" do
         flexmock(Eloqua::Api::Service).should_receive(method).\
-            with(subject.remote_group, subject.remote_object_type).once
+            with(subject.remote_group, subject.remote_type).once
         subject.send(method)
       end
     end
@@ -41,7 +41,7 @@ shared_examples_for "class level delegation of remote operations for" do |remote
     context "#self.#{method}" do
       it "should delegate #{method} to Eloqua::Api::Service with group name" do
         flexmock(Eloqua::Api::Service).should_receive(method).\
-            with(subject.remote_object_type).once
+            with(subject.remote_type).once
         subject.send(method)
       end
     end

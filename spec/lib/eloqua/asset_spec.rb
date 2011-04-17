@@ -4,7 +4,7 @@ describe Eloqua::Asset do
   
   subject do
     Class.new(Eloqua::Asset) do
-      self.remote_object_type = api.remote_object_type('ContactGroupName', 'ContactGroup', 0)
+      self.remote_type = api.remote_type('ContactGroupName', 'ContactGroup', 0)
       def self.name
         'ContactGroup'
       end
@@ -13,7 +13,7 @@ describe Eloqua::Asset do
 
   let(:entity) do
     Class.new(Eloqua::Entity) do
-      self.remote_object_type = api.remote_object_type('Contact')
+      self.remote_type = api.remote_type('Contact')
     end
   end
 

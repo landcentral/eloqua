@@ -21,7 +21,7 @@ module Eloqua
     class << self
 
       def list_memberships(id)
-        api.list_memberships(remote_object_type, id)
+        api.list_memberships(remote_type, id)
       end
 
       # This method does ~NOT~ sanitize input like active record does
@@ -40,7 +40,7 @@ module Eloqua
       def where(conditions, fields = [], limit = 200, page = 1)
         xml_query = api.builder do |xml|
           xml.eloquaType do
-            xml.template!(:object_type, remote_object_type)
+            xml.template!(:object_type, remote_type)
           end
           xml.searchQuery(build_query(conditions))
           xml.pageNumber(page)

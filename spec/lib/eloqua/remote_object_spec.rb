@@ -4,7 +4,7 @@ describe Eloqua::RemoteObject do
     
   subject do
     Class.new(Eloqua::RemoteObject) do
-      self.remote_object_type = Eloqua::Api.remote_object_type('Contact')
+      self.remote_type = Eloqua::Api.remote_type('Contact')
       self.remote_group = :entity
       
       def self.name
@@ -14,8 +14,8 @@ describe Eloqua::RemoteObject do
     end
   end
 
-  let(:remote_object_type) do
-    subject.api.remote_object_type('Contact')
+  let(:remote_type) do
+    subject.api.remote_type('Contact')
   end
   
   context "#self.remote_group" do

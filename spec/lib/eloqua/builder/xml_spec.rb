@@ -130,19 +130,19 @@ describe Eloqua::Builder::Xml do
     end
 
     let(:entity) do
-      Eloqua::Api.remote_object_type('Contact')
+      Eloqua::Api.remote_type('Contact')
     end
     
     context ':object' do
       let(:args) do
-        ['random', Eloqua::Api.remote_object_type('Contact'), 1]
+        ['random', Eloqua::Api.remote_type('Contact'), 1]
       end
       
       let(:expected) do
         xml! do |xml|
           xml.random do
             xml.RandomType do
-              xml.template!(:object_type, Eloqua::Api.remote_object_type('Contact'))
+              xml.template!(:object_type, Eloqua::Api.remote_type('Contact'))
             end
             xml.Id(1)
           end
@@ -156,7 +156,7 @@ describe Eloqua::Builder::Xml do
     context ':dynamic' do
 
       let(:args) do
-        ['entity', Eloqua::Api.remote_object_type('Contact'), 124194, {:C_Company => 'Lights of Apollo LLC'}]
+        ['entity', Eloqua::Api.remote_type('Contact'), 124194, {:C_Company => 'Lights of Apollo LLC'}]
       end
 
       let(:expected) do
@@ -204,7 +204,7 @@ describe Eloqua::Builder::Xml do
     context ':entity' do
 
       let(:input) do
-        Eloqua::Api.remote_object_type('Contact')
+        Eloqua::Api.remote_type('Contact')
       end
 
       let(:expected) do

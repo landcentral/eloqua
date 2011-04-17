@@ -15,7 +15,7 @@ module Eloqua
 
       class << self
 
-        delegate :builder, :remote_object_type, :to => Eloqua::Api
+        delegate :builder, :remote_type, :to => Eloqua::Api
         
         def entity_association_xml(asset_type, asset_id, entity, entity_id)
           xml_query = builder do |xml|

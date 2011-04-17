@@ -274,15 +274,15 @@ describe Eloqua::Api::Service do
   let(:group) { :asset }
 
   let(:type) do
-    subject.remote_object_type('Contact')
+    subject.remote_type('Contact')
   end
 
   let(:asset_type) do
-    subject.remote_object_type('ContactGroupName', 'ContactGroup', 0)
+    subject.remote_type('ContactGroupName', 'ContactGroup', 0)
   end
 
   let(:entity_type) do
-    subject.remote_object_type('Contact')
+    subject.remote_type('Contact')
   end
 
   context "#self.entity_association_xml" do
@@ -340,8 +340,8 @@ describe Eloqua::Api::Service do
     end
   end
 
-  it_behaves_like 'operations for entity and asset', :asset, Eloqua::Api.remote_object_type('ContactGroupName', 'ContactGroup', 0)
-  it_behaves_like 'operations for entity and asset', :entity, Eloqua::Api.remote_object_type('Contact')
+  it_behaves_like 'operations for entity and asset', :asset, Eloqua::Api.remote_type('ContactGroupName', 'ContactGroup', 0)
+  it_behaves_like 'operations for entity and asset', :entity, Eloqua::Api.remote_type('Contact')
 
   context "#self.list_memberships" do
     let(:xml_body) do
