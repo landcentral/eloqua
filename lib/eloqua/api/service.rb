@@ -10,7 +10,7 @@ module Eloqua
       cattr_reader :type_methods
 
       @@group_methods = [:key_with_object, :object_method, :list_types, :describe_type]
-      @@type_methods = [:list_memberships]
+      @@type_methods = []
       @@group_type_methods = [:create_object, :update_object, :delete_object, :find_object, :describe]
 
       class << self
