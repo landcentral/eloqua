@@ -143,10 +143,12 @@ module Eloqua
             xml.template!(:object, :entity, entity_type, entity_id)
           end
           results = request(:list_group_membership, xml_query)
-          results = results[:dynamic_asset]
-          results.inject([]) do |map, object|
-            map << object[:asset_type]
-            map
+          if(results.has_key?(:dynamic_asset))
+            results = Eloqua.format_results_for_array(results, :dynamic_asset)
+            results.inject([]) do |map, object|
+              map << object[:asset_type]
+              map
+            end
           end
         end
 
