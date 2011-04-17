@@ -9,9 +9,21 @@ module Eloqua
     def list_memberships
       self.class.list_memberships(id)
     end
-            
+
+    def add_membership(asset)
+      asset.add_member(self)
+    end
+
+    def remove_membership(asset)
+      asset.remove_member(self)
+    end
+
     class << self
-      
+
+      def list_memberships(id)
+        api.list_memberships(remote_object_type, id)
+      end
+
       # This method does ~NOT~ sanitize input like active record does
       def build_query(where)
         if(where.is_a?(String))

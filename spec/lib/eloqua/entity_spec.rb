@@ -10,12 +10,37 @@ describe Eloqua::Entity do
       end
     end
   end
+
+  let(:asset) do
+    Class.new(Eloqua::Asset) do
+      self.remote_object_type = api.remote_object_type('0', 'ContactGroup', '0')
+    end
+  end
   
   let(:object) do
     subject.new({:id => 1}, :remote)
   end
   
   it_behaves_like 'class level delegation of remote operations for', :entity
+
+  context "membership methods" do
+
+    context "#add_membership" do
+      it 'should call remove_member on given asset' do
+        flexmock(asset).should_receive(:add_member).with(object).once
+        object.add_membership(asset)
+      end
+    end
+
+    context "#remove_membership" do
+      it 'should call remove_member on given asset' do
+        flexmock(asset).should_receive(:remove_member).with(object).once
+        object.remove_membership(asset)
+      end
+    end
+
+
+  end
 
   context "#list_memberships" do
     
@@ -24,6 +49,13 @@ describe Eloqua::Entity do
       object.list_memberships
     end
     
+  end
+
+  context "#self.list_memberships" do
+    it 'should delegate call to api' do
+      flexmock(subject.api).should_receive(:list_memberships).with(subject.remote_object_type, 1).once
+      subject.list_memberships(1)
+    end
   end
 
   context "#self.remote_object" do
