@@ -70,7 +70,30 @@ describe Eloqua::RemoteObject do
     end
 
   end
-  
+
+  context "#reload" do
+
+    let(:new_attr) { {:C_EmailAddress => 'new'} }
+
+    before do
+      flexmock(subject).should_receive(:find_object, 1).\
+        and_return(new_attr).\
+        once
+
+      @object = subject.new({:id => 1, :C_EmailAddress => 'old'}, :remote)
+      @object.reload
+    end
+
+    it 'should have updated email to new' do
+      @object.email_address.should == 'new'
+    end
+
+    it 'should not be dirty' do
+      @object.attribute_changed?(:email_address).should be_false
+    end
+
+  end
+
   context '#persisted?' do
     
     it 'should be false when created with new' do

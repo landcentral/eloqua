@@ -61,6 +61,18 @@ module Eloqua
       end
       
     end
+
+    def reload
+      if(persisted?)
+        attr = self.class.find_object(id)
+        attr = map_attributes(attr)
+        attr = convert_attribute_values!(attr)
+        @attributes.update(attr)
+        changed_attributes.update({}) if changed_attributes
+        previous_changes.update({}) if previous_changes
+        true
+      end
+    end
     
     def persisted?
       @_persisted ||= false
