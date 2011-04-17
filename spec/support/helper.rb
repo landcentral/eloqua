@@ -14,16 +14,22 @@ module Eloqua
       end
                         
       def mock_api_request(method = nil, xml_body = nil, result = nil)
+        mocked_object = subject
+
+        if(mocked_object.respond_to?(:api))
+          mocked_object = mocked_object.api
+        end
+        
         if(!xml_body && !result)
           # No with expectation
           result = method
-          flexmock(subject).should_receive(:request).\
-                              and_return(result)      
+          flexmock(mocked_object).should_receive(:request).\
+                              and_return(result).once
         else
           # with expectation
-          flexmock(subject).should_receive(:request).\
+          flexmock(mocked_object).should_receive(:request).\
                               with(method, xml_body).\
-                              and_return(result)      
+                              and_return(result).once      
         end
       end
       

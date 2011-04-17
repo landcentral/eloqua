@@ -87,63 +87,7 @@ describe Eloqua::Asset do
   end
   
   it_behaves_like 'supports CURD remote operations', :asset
-  
-  context "during group member class operations" do
     
-    let(:xml_body) do
-      asset.entity_association_xml(1, entity, 1)
-    end
-    
-    context "#self.entity_asset_operation" do
-      
-      context "when adding group member" do
-        it_behaves_like 'asset entity association with response', :add_group_member, :success
-      end
-
-      context "when removing group member" do
-        it_behaves_like 'asset entity association with response', :remove_group_member, :success
-      end
-      
-    end
-    
-    context "#self.add_group_member" do
-      it_behaves_like 'asset entity association operation', :add_group_member
-    end
-    
-    context "#self.remove_group_member" do
-      it_behaves_like 'asset entity association operation', :remove_group_member
-    end
-      
-  end
-  
-  
-  
-  context "#self.entity_association_xml" do
-    
-    let(:expected_xml) do
-      xml_query = xml! do |xml|
-        xml.template!(:object, :entity, entity.remote_object_type, 1)
-        xml.template!(:object, :asset, asset.remote_object_type, 1)
-      end
-    end
-    
-    
-    context 'when entity given is a class' do
-      it 'should return expected xml' do
-        output = asset.entity_association_xml(1, entity, 1)
-        output.should == expected_xml
-      end      
-    end
-    
-    context 'when entity given is a hash' do
-      it 'should return expected xml' do
-        output = asset.entity_association_xml(1, entity.remote_object_type, 1)
-        output.should == expected_xml
-      end      
-    end
-    
-  end
-  
   # context "creating contact group" do
   #   
   #   

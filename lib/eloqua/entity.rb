@@ -5,32 +5,12 @@ module Eloqua
   class Entity < RemoteObject
     
     self.remote_object = :entity
-    
-    def add_membership(asset_id)
-      Eloqua::Asset.add_group_member(asset_id, remote_object_type, id)
-    end
-    
-    def remove_membership(asset_id)
-      Eloqua::Asset.remove_group_member(asset_id, remote_object_type, id)
-    end
-    
+
     def list_memberships
       self.class.list_memberships(id)
     end
-    
+            
     class << self
-      
-      def list_memberships(id)
-        xml_query = api.builder do |xml|
-          xml.template!(:object, :entity, remote_object_type, id)
-        end
-        results = request(:list_group_membership, xml_query)
-        results = results[:dynamic_asset]
-        memberships = results.inject([]) do |map, object|
-          map << object[:asset_type]
-          map
-        end
-      end
       
       # This method does ~NOT~ sanitize input like active record does
       def build_query(where)
@@ -55,7 +35,7 @@ module Eloqua
           xml.pageSize(limit)
         end
 
-        result = request(:query, xml_query)
+        result = api.request(:query, xml_query)
         if(result[:entities])
           records = []
           result = result[:entities]

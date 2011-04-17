@@ -1,4 +1,4 @@
-require 'eloqua/api'
+require 'eloqua/api/service'
 require 'eloqua/helper/attribute_map'
 require 'active_model'
 require 'active_support/core_ext/hash'
@@ -23,9 +23,7 @@ module Eloqua
     DIRTY_PRIVATE_METHODS.each {|method| public method }
 
     delegate :api, :to => self
-    delegate :request, :to => self
-    delegate :client, :to => self
-    
+
     class_attribute :primary_key, :remote_object_type, :attribute_types, :remote_object
     
     attr_reader :attributes
@@ -34,6 +32,17 @@ module Eloqua
 
     self.primary_key = 'id'
     self.remote_object_type = nil
+
+    Eloqua.delegate_with_args(
+        self, Eloqua::Api::Service, Eloqua::Api::Service.group_methods, [:remote_object]
+    )
+
+    Eloqua.delegate_with_args(
+        self, Api::Service, Api::Service.group_type_methods, [:remote_object, :remote_object_type]
+    )
+    Eloqua.delegate_with_args(
+        self, Api::Service, Api::Service.type_methods, [:remote_object_type]
+    )
       
     # If the remote flag is set to :remote (or true) the object
     # assumes that the attributes are from eloqua directly in their format (IE: C_EmailAddress)
@@ -71,7 +80,7 @@ module Eloqua
     
     def create
       attrs = reverse_map_attributes(attributes)
-      result = self.class.create_remote_object(attrs)
+      result = self.class.create_object(attrs)
       if(result)
         @_persisted = true
         write_attribute(:id, result[:id])
@@ -87,7 +96,7 @@ module Eloqua
         map
       end      
       attrs = reverse_map_attributes(update_attributes)
-      self.class.update_remote_object(self.attributes[primary_key].to_i, attrs)      
+      self.class.update_object(self.attributes[primary_key].to_i, attrs)
     end
     
     def save(options = {})
@@ -181,7 +190,7 @@ module Eloqua
     end
 
     class << self
-
+            
       # Attribute types
       
       def format_results_for_array(results, *keys)
@@ -214,167 +223,20 @@ module Eloqua
         end
       end
 
-      def remote_service_method(method)
-        if(remote_object == :entity)
-          method.to_sym
-        else
-          "#{method}_#{remote_object}".to_sym
-        end
-      end
-            
-      def remote_key_with_object(name)
-        if(remote_object == :entity)
-          name.to_sym
-        else
-          parts = name.to_s.split('_')
-          "#{parts[0]}_#{remote_object}_#{parts[1]}".to_sym
-        end
-      end
-      
       def api
-        Eloqua::Api
+        Eloqua::Api::Service
       end
 
-      def client
-        api.client(:service)
-      end
-
-      def request(method, *args)
-        api.request(:service, method, *args)
-      end
-      
-      def describe
-        xml_query = api.builder do |xml|
-          xml.object_type_lower!(remote_object) do
-            xml.template!(:object_type, remote_object_type)
-          end
-        end
-        remote_method = "describe_#{remote_object}".to_sym
-        result = request(remote_method, xml_query)
-        if(result)
-          field_describe_key = "dynamic_#{remote_object}_field_definition".to_sym
-          fields = result[:fields]
-          if(fields.is_a?(Hash) && fields.has_key?(field_describe_key))
-            result[:fields] = fields[field_describe_key]
-          end
-        end
-        result
-      end
-      
-      
-      def list_types
-        types = "#{remote_object}_types".to_sym
-        result = request("list_#{types}".to_sym)
-        if(result && result[types])
-          result[types][:string]
-        end
-      end
-      
-      # Eloqua CAN find multiple records from retrieve
-      # but for our purpose this would only be confusing so only use
-      # find for single records and use query for multiple results...
       def find(id)
-        xml_query = api.builder do |xml|
-          xml.object_type_lower!(remote_object) do
-            xml.template!(:object_type, remote_object_type)
-          end
-          xml.ids do
-            xml.template!(:int_array, [id])
-          end
+        result = find_object(id)
+        if(result)
+          self.new(result, :remote)
+        else
+          result
         end
-        
+      end
 
-        result = request(remote_service_method(:retrieve), xml_query)
-        
-        field_key = "#{remote_object}_fields".to_sym
-        dynamic_key = "dynamic_#{remote_object}".to_sym
-                
-        if(result[dynamic_key] && result[dynamic_key][:field_value_collection])
-          attribute_list = result[dynamic_key][:field_value_collection][field_key]
-          attributes = {:id => result[dynamic_key][:id].to_i}
-          attribute_list.each do |map|
-            attributes[map[:internal_name]] = map[:value]
-          end
-          self.new(attributes, :remote)
-        else
-          false
-        end
-      end
-                  
-      def create_remote_object(attributes)
-        xml_query = api.builder do |xml|
-          xml.object_collection!(remote_object) do
-            xml.dynamic_object!(remote_object) do
-              xml.template!(:dynamic, remote_object, remote_object_type, nil, attributes)
-            end
-          end
-        end
-        
-        result = request(remote_service_method(:create), xml_query)
-        result = result[remote_key_with_object(:create_result)]
-        
-        if(result[:errors].nil? && result[:id])
-          {:id => result[:id].to_i}
-        else
-          handle_remote_exception(result)
-        end
-      end
-      
-      def update_remote_object(entity_id, attributes)
-        xml_query = api.builder do |xml|
-          xml.object_collection!(remote_object) do
-            xml.dynamic_object!(remote_object) do
-              xml.template!(:dynamic, remote_object, remote_object_type, entity_id, attributes)
-            end
-          end
-        end
-                
-        result = request(remote_service_method(:update), xml_query)
-        result = result[remote_key_with_object(:update_result)]
-        
-        if(result[:success] && result[:id].to_s == entity_id.to_s)
-          true
-        else
-          handle_remote_exception(result)
-        end
-      end
-      
-      def delete_remote_object(id)
-        xml_query = api.builder do |xml|
-          xml.object_type_lower!(remote_object) do
-            xml.template!(:object_type, remote_object_type)
-          end
-          xml.ids do
-            xml.template!(:int_array, [id])
-          end
-        end
-        
-        result = request(remote_service_method(:delete), xml_query)
-        result = result[remote_key_with_object(:delete_result)]
-        
-        if(result[:success] && result[:id].to_s == id.to_s)
-          [result[:id]]
-        else
-          handle_remote_exception(result)
-        end
-      end
-      
-      def handle_remote_exception(response)
-        exception = response[:errors][:error]
-        
-        error_code = exception[:error_code]
-        message = exception[:message]
-        
-        error_message = sprintf("Eloqua Error: Code (%s) | Message: %s", error_code, message)
-        
-        if(error_code =~ /Duplicate/)
-          raise(Eloqua::DuplicateRecordError, error_message)
-        else
-          raise(Eloqua::RemoteError, error_message)
-        end
-        false
-      end
-      
+            
     end
 
   end

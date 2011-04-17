@@ -30,7 +30,6 @@ describe Eloqua::Api do
       end
 
       it 'should return dynamic entity key as the top level hash' do
-        pp @response
         @response.should have_key(:dynamic_entity)
       end
 

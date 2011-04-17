@@ -275,7 +275,7 @@ describe Eloqua::RemoteObject do
     
     context "#update" do
       before do
-        flexmock(klass).should_receive(:update_remote_object).\
+        flexmock(klass).should_receive(:update_object).\
                            with(1, expected).and_return(true)
 
         object.email = 'email'
@@ -297,7 +297,7 @@ describe Eloqua::RemoteObject do
       let(:object) { klass.new }
       
       before do
-        flexmock(klass).should_receive(:create_remote_object).\
+        flexmock(klass).should_receive(:create_object).\
                            with(expected).and_return({:id => 1})
                             
         object.email = 'email'
@@ -322,7 +322,7 @@ describe Eloqua::RemoteObject do
         end
         
         before do
-          flexmock(klass).should_receive(:create_remote_object).\
+          flexmock(klass).should_receive(:create_object).\
                              with({'C_EmailAddress' => 'james@lightsofapollo.com'}).\
                              and_return({:id => 1}).once
           object.save
@@ -345,7 +345,7 @@ describe Eloqua::RemoteObject do
         end
         
         before do
-          flexmock(klass).should_receive(:update_remote_object).\
+          flexmock(klass).should_receive(:update_object).\
                              with(1, {'C_EmailAddress' => 'new'}).\
                              and_return(true).once
 
@@ -402,7 +402,7 @@ describe Eloqua::RemoteObject do
         end      
 
         before do
-          flexmock(klass).should_receive(:update_remote_object).\
+          flexmock(klass).should_receive(:update_object).\
                              with(1, {'C_EmailAddress' => 'email'}).and_return(true)
 
           @result = object.update_attributes(input)      
@@ -573,86 +573,7 @@ describe Eloqua::RemoteObject do
     end    
                 
   end
-  
-  
-  context "#self.remote_key_with_object" do
 
-     let(:klass) do
-       Class.new(subject) do
-
-       end
-     end
-
-     context "when remote_object == :entity" do
-
-       before do
-         klass.remote_object = :entity
-       end
-
-       specify { klass.remote_object.should == :entity }
-
-       it 'should return given name' do
-         klass.remote_key_with_object(:create_result).should == :create_result
-       end
-
-     end
-
-     context "when remote_object == :asset" do
-
-       before do
-         klass.remote_object = :asset
-       end
-
-       specify { klass.remote_object.should == :asset }
-
-       it 'should return given name' do
-         klass.remote_key_with_object(:create_result).should == :create_asset_result
-       end
-
-     end
-
-   end
-
-   context "#self.remote_service_method" do
-
-     let(:klass) do
-       Class.new(subject) do
-
-       end
-     end
-
-     context "when remote_object == :entity" do
-
-       before do
-         klass.remote_object = :entity
-       end
-
-       specify { klass.remote_object.should == :entity }
-
-       it 'should return given name' do
-         klass.remote_service_method(:create).should == :create
-       end
-
-     end
-
-     context "when remote_object == :asset" do
-
-       before do
-         klass.remote_object = :asset
-       end
-
-       specify { klass.remote_object.should == :asset }
-
-       it 'should return given name' do
-         klass.remote_service_method(:create).should == :create_asset
-       end
-
-     end
-
-
-
-   end  
-  
   context '#self.primary_key' do
     it 'is "id" by default' do
       subject.primary_key.should == 'id'
@@ -675,41 +596,7 @@ describe Eloqua::RemoteObject do
     
   context "#self.api" do
     it 'should have api on the class level' do
-      subject.api.should == Eloqua::Api
-    end
-  end
-
-  context "#self.client" do
-    it 'should call client(:service) on api' do
-      flexmock(subject.api).should_receive(:client).with(:service).once
-      subject.client
-    end
-  end
-
-  context "#self.request" do
-    it 'should make requests with the :service client' do
-      flexmock(subject.api).should_receive(:request).with(:service, :method, {})
-      subject.request(:method, {})
-    end
-  end
-  
-  context "#self.handle_remote_errors" do
-    context 'duplicate error' do
-      
-      let(:response) do
-        {:errors=>
-          {:error=>
-            {:error_code=>"DuplicateValue",
-             :message=>"You are attempting to create a duplicate entity."}},
-         :id=>"-1",
-         :entity_type=>{:type=>"Base", :name=>"Contact", :id=>"0"}
-        }   
-      end
-      
-      it 'should raise duplicate exception' do
-        lambda { subject.handle_remote_exception(response) }.should raise_exception(Eloqua::DuplicateRecordError)
-      end
-      
+      subject.api.should == Eloqua::Api::Service
     end
   end
 

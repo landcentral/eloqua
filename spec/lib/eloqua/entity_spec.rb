@@ -16,24 +16,7 @@ describe Eloqua::Entity do
   end
   
   it_behaves_like 'supports CURD remote operations', :entity
-  
-  context "#add_membership" do
-    it 'should delegate call to asset class' do
-      flexmock(Eloqua::Asset).should_receive(:add_group_member).\
-        with(5, object.remote_object_type, object.id).once
 
-      object.add_membership(5)
-    end
-  end
-  
-  context "#remove_membership" do
-    it 'should delegate call to asset class' do
-      flexmock(Eloqua::Asset).should_receive(:remove_group_member).\
-        with(5, object.remote_object_type, object.id).once
-      object.remove_membership(5)
-    end    
-  end
-  
   context "#list_memberships" do
     
     it 'should delegate call to class level with current id' do
@@ -53,12 +36,12 @@ describe Eloqua::Entity do
     before do
       mock_eloqua_request(:list_group_membership, :success).\
         with(:service, :list_group_membership, xml_body).once
-        
+
       @result = subject.list_memberships(1)
     end
     
     it "should provide array of contact groups" do
-      pp @result
+      #pp @result
     end
     
   end
@@ -135,8 +118,9 @@ describe Eloqua::Entity do
       end
       
       before do
-        mock = soap_fixture(:query, :contact_email_one)
-        flexmock(subject.api).should_receive(:send_remote_request).with(:service, :query, xml_body).and_return(mock)
+        mock_eloqua_request(:query, :contact_email_one).\
+            with(:service, :query, xml_body)
+        
         @results = klass.where(input)
       end
       
@@ -179,8 +163,9 @@ describe Eloqua::Entity do
       end
       
       before do
-        mock = soap_fixture(:query, :contact_missing)
-        flexmock(subject.api).should_receive(:send_remote_request).with(:service, :query, xml_body).and_return(mock)
+        mock_eloqua_request(:query, :contact_missing).\
+            with(:service, :query, xml_body)
+        
         @results = klass.where(input)
       end
       

@@ -5,6 +5,14 @@ module Eloqua
   class Api
     class Service
 
+      cattr_reader :group_methods
+      cattr_reader :group_type_methods
+      cattr_reader :type_methods
+
+      @@group_methods = [:key_with_object, :object_method, :list_types, :describe_type]
+      @@type_methods = [:list_memberships]
+      @@group_type_methods = [:create_object, :update_object, :delete_object, :find_object, :describe]
+
       class << self
 
         delegate :builder, :remote_object_type, :to => Eloqua::Api

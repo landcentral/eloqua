@@ -119,9 +119,9 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
 
   end
   
-  context '#self.create_remote_object' do
+  context '#self.create_object' do
     
-    let(:result_key) { subject.remote_key_with_object(:create_result) }    
+    let(:result_key) { subject.key_with_object(:create_result) }    
     let(:input) { [{:C_EmailAddress => 'create'}] }
     let(:create_result) do
       {
@@ -150,7 +150,7 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
       
       before do
         mock_api_request(remote_method(:create), xml_body, create_result)
-        @results = subject.create_remote_object(*input)
+        @results = subject.create_object(*input)
       end
       
       
@@ -181,17 +181,17 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
       end
       
       it 'should raise duplicate error exception' do
-        lambda { subject.create_remote_object(*input) }.should raise_exception(Eloqua::DuplicateRecordError)
+        lambda { subject.create_object(*input) }.should raise_exception(Eloqua::DuplicateRecordError)
       end
       
     end    
     
   end
   
-  context "#self.update_remote_object" do
+  context "#self.update_object" do
     
     
-    let(:result_key) { subject.remote_key_with_object(:update_result) }
+    let(:result_key) { subject.key_with_object(:update_result) }
     
     let(:update_result) do
       {
@@ -220,7 +220,7 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
 
       before do
         mock_api_request(remote_method(:update), xml_body, update_result)
-        @results = subject.update_remote_object(*input)        
+        @results = subject.update_object(*input)
       end
       
       it 'should return true' do
@@ -231,10 +231,10 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
     
   end
   
-  context "#self.delete_remote_object" do
+  context "#self.delete_object" do
     
     context "when given single int" do
-      let(:result_key) { subject.remote_key_with_object(:delete_result) }
+      let(:result_key) { subject.key_with_object(:delete_result) }
       
       let(:delete_result) do
         {
@@ -260,7 +260,7 @@ shared_examples_for "supports CURD remote operations" do |remote_object|
       
       before do
         mock_api_request(remote_method(:delete), xml_body, delete_result)
-        @result = subject.delete_remote_object(1)
+        @result = subject.delete_object(1)
       end
       
       it 'should return an array of deleted ids' do

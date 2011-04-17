@@ -38,6 +38,18 @@ shared_examples_for "operations for entity and asset" do |group, type|
 
   let(:field_key) { "#{group}_fields".to_sym }
 
+  context "#self.group_methods" do
+    specify { subject.group_methods.class.should == Array }
+  end
+
+  context "#self.group_type_methods" do
+    specify { subject.group_type_methods.class.should == Array }
+  end
+
+  context "#self.type_methods" do
+    specify { subject.type_methods.class.should == Array }
+  end
+
   context '#self.create_object' do
 
     let(:result_key) { subject.key_with_object(group, :create_result) }

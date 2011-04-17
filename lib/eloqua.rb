@@ -1,11 +1,12 @@
-require 'eloqua/api'
-require 'eloqua/entity'
-require 'eloqua/asset'
+require 'active_support/core_ext/class'
+require 'active_support/core_ext/module'
 
 module Eloqua
   
   autoload :Api, 'eloqua/api'
   autoload :Entity, 'eloqua/entity'
+  autoload :Asset, 'eloqua/asset'
+  autoload :RemoteObject, 'eloqua/remote_object'
   
   mattr_accessor :user, :password
   
@@ -31,6 +32,18 @@ module Eloqua
       results = [results]
     end
     results
+  end
+
+  def self.delegate_with_args(from_klass, to_klass, methods, methods_to_argument)
+    argument_string = methods_to_argument.join(', ')
+    methods.each do |__method_name|
+      from_klass.module_eval(<<-RUBY)
+        def self.#{__method_name}(*args, &block)
+          #{to_klass}.__send__(#{__method_name.inspect}, #{argument_string}, *args, &block)
+        end
+      RUBY
+    end
+
   end
 
   
