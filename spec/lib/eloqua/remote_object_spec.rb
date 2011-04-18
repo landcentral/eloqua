@@ -1,5 +1,37 @@
 require 'spec_helper'
 
+shared_examples_for 'remote operation that converts attribute values' do |operation|
+
+  let(:method) { "#{operation}_object".to_sym }
+
+  let(:klass) do
+    Class.new(subject) do
+      map :C_California1 => :california
+      attr_checkbox(:california)
+    end
+  end
+  
+  context "when #{operation.to_s.pluralize} object" do
+    it 'should convert value before saving' do
+      if(operation == :update)
+        object = klass.new(:id => 1)
+        flexmock(object.class).should_receive(method).\
+          with(1, {'C_California1' => 'Yes'}).once
+      else
+        object = klass.new
+        flexmock(object.class).should_receive(method).\
+          with({'C_California1' => 'Yes'}).once
+      end
+
+      
+      object.california = true
+      object.save
+    end
+
+  end
+
+end
+
 describe Eloqua::RemoteObject do
     
   subject do
@@ -65,9 +97,6 @@ describe Eloqua::RemoteObject do
             
     end
 
-    context "when creating object" do          
-
-    end
 
   end
 
@@ -295,8 +324,12 @@ describe Eloqua::RemoteObject do
         :C_FirstName => 'first'
       }.with_indifferent_access
     end
+
+    
+    it_behaves_like 'remote operation that converts attribute values', :update
     
     context "#update" do
+
       before do
         flexmock(klass).should_receive(:update_object).\
                            with(1, expected).and_return(true)
@@ -314,9 +347,11 @@ describe Eloqua::RemoteObject do
       specify { object.email.should == 'email' }
       specify { object.name.should == 'first' }
     end    
+   
     
+    it_behaves_like 'remote operation that converts attribute values', :create 
+
     context "#create" do
-      
       let(:object) { klass.new }
       
       before do
@@ -469,7 +504,8 @@ describe Eloqua::RemoteObject do
         
     
   end
-    
+
+
   context "#self.attr_type_hash" do
 
     let(:expected) do
@@ -482,6 +518,36 @@ describe Eloqua::RemoteObject do
 
     it 'should return a hash with the expected output' do
       subject.attr_type_hash(:my_name).should == expected
+    end
+
+  end
+
+  context '#convert_attribute_values' do
+    let(:klass) do
+      Class.new(subject) do
+        map :C_California1 => :california
+        attr_checkbox(:california)
+      end
+    end
+
+    context 'when :import' do
+      it 'should call import_boolean_checkbox' do
+        object = klass.new(:california => 'Yes')
+        flexmock(object.class).should_receive(:import_boolean_checkbox).with(:california, 'Yes').and_return(true)
+        attrs = object.convert_attribute_values(object.attributes)
+        attrs[:california].should === true
+      end
+    end
+
+    context 'when :export' do
+
+      it 'should call export_boolean_checkbox' do
+        object = klass.new(:california => 'Yes')
+        flexmock(object.class).should_receive(:export_boolean_checkbox).with(:california, true).and_return('Yes')
+        attrs = object.convert_attribute_values(object.attributes, :export)
+        attrs[:california].should === 'Yes'
+      end
+ 
     end
 
   end
@@ -503,6 +569,7 @@ describe Eloqua::RemoteObject do
 
     let(:klass) do
       Class.new(subject) do
+        map :C_California1 => :california
         attr_checkbox :california
       end
     end
@@ -533,7 +600,8 @@ describe Eloqua::RemoteObject do
     context 'when creating object with checkbox as false' do
       let(:object) { klass.new(:california => false) }
       specify { object.attributes[:california].should == false }
-    end        
+    end
+
   end
 
   context '#self.primary_key' do

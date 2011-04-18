@@ -22,8 +22,6 @@ module Eloqua
     DIRTY_PRIVATE_METHODS = [:attribute_was, :attribute_changed?, :attribute_change]
     DIRTY_PRIVATE_METHODS.each {|method| public method }
 
-    delegate :api, :to => self
-
     class_attribute :primary_key, :remote_type, :attribute_types, :remote_group
     
     attr_reader :attributes
@@ -55,7 +53,7 @@ module Eloqua
         @_persisted = true
         attr = map_attributes(attr)
       end
-      @attributes = convert_attribute_values!(attr).with_indifferent_access
+      @attributes = convert_attribute_values(attr).with_indifferent_access
       if(@attributes.has_key?(primary_key) && @attributes[primary_key])
         @_persisted = true
       end
@@ -66,7 +64,7 @@ module Eloqua
       if(persisted?)
         attr = self.class.find_object(id)
         attr = map_attributes(attr)
-        attr = convert_attribute_values!(attr)
+        attr = convert_attribute_values(attr)
         @attributes.update(attr)
         changed_attributes.update({}) if changed_attributes
         previous_changes.update({}) if previous_changes
@@ -78,9 +76,10 @@ module Eloqua
       @_persisted ||= false
     end
 
-    def convert_attribute_values!(attributes)
+    def convert_attribute_values(attributes, convert_type = :import)
+      attributes = attributes.clone
       attributes.each do |key, value|
-        attributes[key] = self.send(attribute_types[key][:import], key, value) if(attribute_types.has_key?(key))
+        attributes[key] = self.send(attribute_types[key][convert_type], key, value) if(attribute_types.has_key?(key))
       end
       attributes
     end
@@ -91,7 +90,8 @@ module Eloqua
     # Persistance
     
     def create
-      attrs = reverse_map_attributes(attributes)
+      attrs = convert_attribute_values(attributes, :export)
+      attrs = reverse_map_attributes(attrs)
       result = self.class.create_object(attrs)
       if(result)
         @_persisted = true
@@ -107,7 +107,8 @@ module Eloqua
         map[attr] = send(attr.to_sym)
         map
       end      
-      attrs = reverse_map_attributes(update_attributes)
+      attrs = convert_attribute_values(update_attributes, :export)
+      attrs = reverse_map_attributes(attrs)
       self.class.update_object(self.attributes[primary_key].to_i, attrs)
     end
     
