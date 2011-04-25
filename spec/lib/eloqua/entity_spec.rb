@@ -107,7 +107,7 @@ describe Eloqua::Entity do
   end  
   
   context '#self.where' do
-    
+    let(:expected_query) { "C_EmailAddress='james@lightsofapollo.com'" }
     let(:klass) do
       Class.new(subject) do
         map :C_EmailAddress => :email
@@ -123,7 +123,7 @@ describe Eloqua::Entity do
           xml.eloquaType do
             xml.template!(:object_type, api.remote_type('Contact'))
           end
-          xml.searchQuery("C_EmailAddress='james@lightsofapollo.com'")
+          xml.searchQuery(expected_query)
           xml.pageNumber(1)
           xml.pageSize(200)
         end
@@ -157,6 +157,37 @@ describe Eloqua::Entity do
         end
       end
       
+    end
+
+    context "when successfuly finding results with limited number of fields" do
+      let(:input) { [{:email => 'james@lightsofapollo.com'}, [:email]] }
+      let(:xml_body) do
+        api = subject.api
+        xml! do |xml|
+          xml.eloquaType do
+            xml.template!(:object_type, api.remote_type('Contact'))
+          end
+          xml.searchQuery(expected_query)
+          xml.fieldNames do
+            xml.template!(:array, ['C_EmailAddress'])
+          end
+          xml.pageNumber(1)
+          xml.pageSize(200)
+        end
+      end
+      
+      before do
+        mock_eloqua_request(:query, :contact_email_one).\
+          with(:service, :query, xml_body)
+
+        @results = klass.where(*input)
+      end
+      
+      # HINT- This is actually asserted above in the mock_eloqua_request
+      it "should request that the results only return the C_EmailAddress field" do
+        @results.should be_true
+      end
+
     end
     
     context "when rows are not found" do

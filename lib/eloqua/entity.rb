@@ -33,6 +33,8 @@ module Eloqua
           where.each do |attr, value|
             parts << "#{eloqua_attribute(attr)}='#{value}'"
           end
+          # In Eloqua Query terms AND is closer to a join condition then it
+          # is to a logical operator. In short it is closer to an SQL OR.
           parts.join(" AND ")
         end
       end
@@ -43,6 +45,14 @@ module Eloqua
             xml.template!(:object_type, remote_type)
           end
           xml.searchQuery(build_query(conditions))
+          if(!fields.blank? && fields.is_a?(Array))
+            fields.map! do |field|
+              field = eloqua_attribute(field)
+            end
+            xml.fieldNames do
+              xml.template!(:array, fields)
+            end
+          end
           xml.pageNumber(page)
           xml.pageSize(limit)
         end
