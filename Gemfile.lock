@@ -37,6 +37,7 @@ GEM
       mocha (>= 0.9.8)
       rspec (>= 2.0.0)
       savon (~> 0.8.0)
+    timecop (0.3.5)
     watchr (0.7)
 
 PLATFORMS
@@ -51,4 +52,5 @@ DEPENDENCIES
   ruby-fsevent
   savon
   savon_spec
+  timecop
   watchr

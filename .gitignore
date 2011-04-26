@@ -3,3 +3,5 @@ eloqua_initializer.rb
 irb.rb
 .bundle
 .idea
+doc
+.yardoc

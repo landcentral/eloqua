@@ -10,3 +10,4 @@ gem 'rspec', "> 2.0", :groups => [:test, :development]
 gem 'flexmock', :group => :test
 gem 'watchr', :groups => [:test, :development]
 gem 'ruby-fsevent', :groups => [:test, :development]
+gem 'timecop', :groups => [:test, :development]

@@ -8,6 +8,7 @@ require 'net/https'
 Bundler.require :default, :test
 
 require 'rspec'
+require 'timecop'
 require 'eloqua'
 
 unless defined?(ELOQUA_LIB)
