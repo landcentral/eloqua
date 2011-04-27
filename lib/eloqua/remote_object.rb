@@ -41,6 +41,8 @@ module Eloqua
     Eloqua.delegate_with_args(
         self, Api::Service, Api::Service.type_methods, [:remote_type]
     )
+
+		delegate :api, :to => self
       
     # If the remote flag is set to :remote (or true) the object
     # assumes that the attributes are from eloqua directly in their format (IE: C_EmailAddress)

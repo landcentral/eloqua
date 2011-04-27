@@ -630,4 +630,10 @@ describe Eloqua::RemoteObject do
     end
   end
 
+	context "#api" do
+		 it "should have api on the instance level" do
+			 subject.new.api.should == Eloqua::Api::Service
+		 end
+	end
+
 end

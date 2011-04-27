@@ -7,6 +7,7 @@ module Eloqua
   autoload :Entity, 'eloqua/entity'
   autoload :Asset, 'eloqua/asset'
   autoload :RemoteObject, 'eloqua/remote_object'
+	autoload :Query, 'eloqua/query'
   
   mattr_accessor :user, :password
   

@@ -62,49 +62,6 @@ describe Eloqua::Entity do
     specify { subject.remote_group.should == :entity }
   end
   
-  context "#self.build_query" do
-    
-    context "when using a string" do
-      
-      let(:input) do
-        "C_EmailAddress = 'test'"
-      end
-      
-      it 'should return given value' do
-        subject.build_query(input).should == input
-      end
-            
-    end
-    
-    context 'when using a hash' do
-            
-      let(:klass) do
-        Class.new(subject) do
-          map :C_EmailAddress => 'email'
-        end
-      end
-      
-      it 'should generate query string using map_attribute on mapped attributes' do
-        klass.build_query(:email => 'test').should == "C_EmailAddress='test'"
-      end
-      
-      it 'should use given attribute name when none is mapped' do
-        klass.build_query(:C_Company => 'company').should == "C_Company='company'"
-      end
-      
-      it 'should join coniditons with and' do
-        email_param = "C_EmailAddress='test'"
-        company_param = "C_Company='company'"
-        
-        result = klass.build_query(:email => 'test', :C_Company => 'company')
-        result.should include(email_param)
-        result.should include(company_param)
-        result.should include(' AND ')
-      end
-      
-    end
-    
-  end  
   
   context '#self.where' do
     let(:expected_query) { "C_EmailAddress='james@lightsofapollo.com'" }
@@ -113,6 +70,14 @@ describe Eloqua::Entity do
         map :C_EmailAddress => :email
       end
     end
+
+		context "when given no arguments" do
+			it "should return an Eloqua::Query object" do
+				query = subject.where
+				query.should be_an(Eloqua::Query)
+				query.remote_object.should == subject
+			end
+		end
     
     context "when successfuly finding single result with all fields" do
     
