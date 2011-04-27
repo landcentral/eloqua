@@ -187,6 +187,7 @@ Through {Eloqua::Query} you can search through your Eloqua database.
 
 Given we have this Contact class:
 
+
 		class Contact < Eloqua::Contact
 			self.remote_type = api.remote_type('Contact')
 			
