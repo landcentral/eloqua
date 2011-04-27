@@ -6,24 +6,24 @@ shared_examples_for "chainable query attribute that resets has_requested?" do |m
   context "##{method}" do
     
     it "should act like a getter when given no value" do
-      object.send(method).should == object.instance_variable_get("@#{method}".to_sym)
+      subject.send(method).should == subject.instance_variable_get("@#{method}".to_sym)
     end
 
     it "should act like a setter and return self when given a value" do
-      object.send(method, given).should === object
-      object.send(method).should == given
+      subject.send(method, given).should === subject
+      subject.send(method).should == given
     end
 
     context "when modifying #{method} after a request" do
 
       before do
-        make_simple_request!
+        simple_request!
       end
 
       it "should reset has_requested to false" do
-        object.should have_requested
-        object.send(method, given)
-        object.should_not have_requested
+        subject.should have_requested
+        subject.send(method, given)
+        subject.should_not have_requested
       end
 
     end
@@ -32,8 +32,9 @@ shared_examples_for "chainable query attribute that resets has_requested?" do |m
 end
 
 describe Eloqua::Query do
-  subject { Eloqua::Query } 
-
+  subject { klass.new(entity) }
+  let(:klass) { Eloqua::Query } 
+  let(:expected_query) { "C_EmailAddress='*' AND Date>'2011-04-20'" }
 
   let(:entity) do
     Class.new(Eloqua::Entity) do
@@ -41,106 +42,210 @@ describe Eloqua::Query do
       map :C_EmailAddress => :email
     end
   end
+    
+  
+  def mock_query_hash(records, pages)
+    entities = []
+    records.to_i.times do |i|
+      entities << {:field_value_collection=>
+          {:entity_fields=>
+            [{:value=>"james@lightsofapollo.com",
+              :internal_name=>"C_EmailAddress"},
+             {:value=>"James", :internal_name=>"C_FirstName"}]},
+         :id=>"#{i + 1}",
+         :entity_type=>{:type=>"Base", :name=>"Contact", :id=>"0"}
+      }
+    end
+    {
+      :total_pages=>"#{pages}",
+      :total_records=>"#{records * pages}",
+      :entities=>{ :dynamic_entity => entities },
+      :i=>"http://www.w3.org/2001/XMLSchema-instance"
+    }
+  end
 
-  let(:object) { subject.new(entity) }
+  def conditions!(query = nil)
+    query = (query.nil?)? subject : query
 
-  def make_simple_request!
-    expected_query = "C_EmailAddress='*' AND Date>'2011-04-20'"
+    query.\
+      on(:email, '=', '*').\
+      on('Date', '>', '2011-04-20')
+  end
+
+  def limit!(query = nil)
+    query = (query.nil?)? subject : query
+    query.page(1).limit(200)
+  end
+
+  def expect_simple_request
     xml_body = xml! do |xml|
-      api = object.remote_object.api
+      api = subject.remote_object.api
       xml.eloquaType do
         xml.template!(:object_type, api.remote_type('Contact'))
       end
       xml.searchQuery(expected_query)
-      xml.pageNumber(2)
-      xml.pageSize(100)
+      xml.pageNumber(1)
+      xml.pageSize(200)
     end
-
     mock_eloqua_request(:query, :contact_email_one).\
       with(:service, :query, xml_body).once
-    object.\
-      condition(:email, '=', '*').\
-      condition('Date', '>', '2011-04-20').\
-      page(2).\
-      limit(100).\
-      request!
+  end
+
+  def expect_request_pages(records, pages, current_page = nil, limit = 200)
+    remote_results = mock_query_hash(records, pages)
+    mock = mock_api_request(remote_results)
+    if(current_page)
+      xml_body = xml! do |xml|
+        api = subject.remote_object.api
+        xml.eloquaType do
+          xml.template!(:object_type, api.remote_type('Contact'))
+        end
+        xml.searchQuery(expected_query)
+        xml.pageNumber(current_page)
+        xml.pageSize(limit)
+      end
+      mock.with(:query, xml_body)
+    end
+    mock
+  end
+
+  def simple_request!
+    expect_simple_request
+    conditions!
+    limit!
+    subject.request!
+  end
+
+
+  context "#test.mock_query_hash" do
+    it "should have proper number of pages" do
+      mock = mock_query_hash(20, 20)
+      mock[:total_pages].should == "20"
+      mock[:total_records].should == (20 * 20).to_s
+      mock[:entities][:dynamic_entity].length.should == 20
+    end
   end
 
 
   context "#api" do
     it "should delegate #api to remote object" do
-      flexmock(object.remote_object).should_receive(:api).once
-      object.api
+      flexmock(subject.remote_object).should_receive(:api).once
+      subject.api
     end
   end
 
   context "#new" do
     
     it 'should raise ArgumentError when given anything but an Eloqua::RemoteObject' do
-      lambda { subject.new({}) }.should raise_exception(ArgumentError, /must provide an Eloqua::RemoteObject /)
+      lambda { klass.new({}) }.should raise_exception(ArgumentError, /must provide an Eloqua::RemoteObject /)
     end
 
     context "when initializing with Eloqua::RemoteObject" do
-      it "should have saved remote object to #remote_object" do
-        object.remote_object.should == entity
+      it "should have saved remote subject to #remote_object" do
+        subject.remote_object.should == entity
       end
 
       it "should preset the #page to 1" do
-        object.page.should == 1
+        subject.page.should == 1
       end
 
       it "should preset #limit to 200" do
-        object.limit.should == 200
+        subject.limit.should == 200
       end
 
       it "should have an empty collection" do
-        object.collection.should be_empty
+        subject.collection.should be_empty
       end
 
       it "should have no conditions" do
-        object.conditions.should be_empty
+        subject.conditions.should be_empty
       end
 
       it "should #fields should be nil" do
-        object.fields.should be_nil
+        subject.fields.should be_nil
       end
       
       it "should not have requested yet" do
-        object.should_not have_requested
+        subject.should_not have_requested
       end
 
     end
+
   end
 
   it_behaves_like "chainable query attribute that resets has_requested?", :page, 5
   it_behaves_like "chainable query attribute that resets has_requested?", :limit, 5
   it_behaves_like "chainable query attribute that resets has_requested?", :fields, [:email, 'Date']
 
-  context "#condition" do
+  context "#on" do
 
     context "adding a single condition" do
       before do
-        @result = object.condition(:email, '=', '*')
+        @result = subject.on(:email, '=', '*')
       end
 
       it "should return self" do
-        @result.should === object
+        @result.should === subject
       end
 
       it "should have added condition" do
-        object.conditions.length.should == 1
+        subject.conditions.length.should == 1
       end
 
       it "should have added condition field, type and value" do
-        object.conditions.first.should == {
+        subject.conditions.first.should == {
           :field => :email,
           :type => '=',
           :value => '*'
         }
       end
+
+    end
+
+    context "adding additional condition after request" do
+      it "should have not made request" do
+        subject.should_not have_requested
+      end
+
+      context "after request" do
+        
+        before do
+          simple_request!
+        end
+
+        it "should have requested" do
+          subject.should have_requested
+        end
+
+        it "should reset have requested when adding new condition" do
+          subject.on(:email, '=', 'ouch')
+          subject.should_not have_requested
+        end
+
+      end
+
     end
 
   end
+
+  context "#clear_conditions!" do
+    it "should clear conditions added by on" do
+      subject.on(:email, '=', '1')
+      subject.conditions.length.should == 1
+      subject.clear_conditions!
+      subject.conditions.length.should == 0
+    end
+
+    it "should reset #has_requested?" do
+      simple_request!
+      subject.should have_requested
+      subject.clear_conditions!
+      subject.should_not have_requested
+    end
+
+  end
+
+  
 
   context "#build_query" do
     let(:entity) do
@@ -150,31 +255,19 @@ describe Eloqua::Query do
       end
     end
 
-    let(:expected) do
-      [
-        "C_EmailAddress='*'",
-        "Date>'2011-04-20'"
-      ].join(' AND ')
-    end
-
     before do
-      query = subject.new(entity)
-      query.\
-        condition(:email, '=', '*').
-        condition('Date', '>', '2011-04-20')
+      query = klass.new(entity)
+      conditions!(query)
       @result = query.send(:build_query)
     end
 
-    specify { @result.should == expected }
+    specify { @result.should == expected_query }
   end
 
   context "#request" do
-    let(:expected_query) { 'C_EmailAddress=\'*\'' }
-    
     context "when requesting without limiting the fields and remote returns one result" do
-      let(:expected_query) { "C_EmailAddress='*' AND Date>'2011-04-20'" }
       before do
-        @result = make_simple_request!
+        @result = simple_request!
       end
 
       it "should return an array of objects" do
@@ -183,19 +276,19 @@ describe Eloqua::Query do
       end
 
       it "should now mark query as #has_requested?" do
-        object.should have_requested
+        subject.should have_requested
       end
 
       it "should have added results to collection" do
-        object.collection.length.should == 1
+        subject.collection.length.should == 1
       end
 
       it "should have set total pages to 1" do
-        object.total_pages.should == 1
+        subject.total_pages.should == 1
       end
 
       it 'should have attributes acording to XML file (query/contact_email_one.xml)' do
-        record = object.collection.first
+        record = subject.collection.first
         record.should be_an(Eloqua::Entity)
         expected = {
           :id => '1',
@@ -210,9 +303,9 @@ describe Eloqua::Query do
 
       context "when has_requested? is true" do
         it "should send a remote request again" do
-          flexmock(object.api).should_receive(:send_remote_request).never
-          object.should have_requested
-          object.request!
+          flexmock(subject.api).should_receive(:send_remote_request).never
+          subject.should have_requested
+          subject.request!
         end
       end
 
@@ -220,7 +313,7 @@ describe Eloqua::Query do
 
     context "when successfuly finding results with limited number of fields" do
       let(:xml_body) do
-        api = object.api
+        api = subject.api
         xml! do |xml|
           xml.eloquaType do
             xml.template!(:object_type, api.remote_type('Contact'))
@@ -228,7 +321,7 @@ describe Eloqua::Query do
           xml.searchQuery(expected_query)
           xml.fieldNames do
             xml.template!(:array, ['C_EmailAddress'])
-          end          
+          end
           xml.pageNumber(1)
           xml.pageSize(200)
         end
@@ -238,22 +331,21 @@ describe Eloqua::Query do
         mock_eloqua_request(:query, :contact_email_one).\
           with(:service, :query, xml_body)
         
-        @result = object.\
-          condition(:email, '=', '*').
-          fields([:email]).\
-          request!
+        conditions!
+
+        @result = subject.fields([:email]).request!
       end
       
       # HINT- This is actually asserted above in the mock_eloqua_request
       it "should request that the results only return the C_EmailAddress field" do
-       object.should have_requested
+       subject.should have_requested
       end
 
     end
 
     context "when rows are not found" do
       let(:xml_body) do
-        api = object.api
+        api = subject.api
         
         xml! do |xml|
           xml.eloquaType do
@@ -268,24 +360,161 @@ describe Eloqua::Query do
       before do
         mock_eloqua_request(:query, :contact_missing).\
             with(:service, :query, xml_body)
-      object.\
-        condition(:email, '=', '*').
-        request!        
+
+        conditions!
+        subject.request!
       end
       
       it "should an empty collection" do
-        object.collection.should be_empty
+        subject.collection.should be_empty
       end
     
       it "should have requested" do
-        object.should have_requested
+        subject.should have_requested
       end
 
       it "should have total pages as 0" do
-        object.total_pages.should == 0
+        subject.total_pages.should == 0
       end
 
     end
+
+  end
+
+  context "#all" do
+
+    context "when request has not yet been made" do
+
+      before do
+        expect_simple_request
+        conditions!
+        limit!
+
+        @result = subject.all
+      end
+
+      it "should have made request" do
+        subject.should have_requested
+      end
+
+      it "should return an array of objects" do
+        @result.should be_an(Array)
+        @result.first.should be_an(Eloqua::Entity)
+      end
+        
+    end
+
+  end
+
+  context "#each" do
+    before do
+      expect_request_pages(20, 1)
+      conditions!
+      limit!
+    end
+
+    it "should iterator through each result and mark query as requested" do
+      subject.should_not have_requested
+      ids = []
+      subject.each do |record|
+        record.should be_an(Eloqua::Entity)
+        ids << record.id
+      end
+      ids.length.should == 20
+      ids.should == ('1'..'20').to_a
+      subject.should have_requested
+    end
+
+  end
+
+
+  context "#each_page" do
+   
+    let(:total) { 10 }
+    let(:pages) { 5 }
+    let(:limit) { 2 }
+    let(:expected_range) { (1..5).to_a }
+    let(:expected_ids) { (['1', '2'] * 5) }
+
+    context "when iterating through 5 pages of results" do
+
+      before do
+
+        # - Clarity over brief
+        expect_request_pages(limit, pages, 1, limit)
+        expect_request_pages(limit, pages, 2, limit)
+        expect_request_pages(limit, pages, 3, limit)
+        expect_request_pages(limit, pages, 4, limit)
+        expect_request_pages(limit, pages, 5, limit)
+
+        @ids = []
+        @pages = []
+
+        conditions!
+        subject.limit(limit)
+
+        last_page = 0
+        subject.each_page do |record|
+          @ids << record.id
+      
+          if(last_page != subject.page)
+            @pages << subject.page
+            last_page = subject.page
+          end
+        end
+      end
+
+      it "should have iterated through 5 pages" do
+        @pages.should == expected_range
+      end
+
+      it "should have iterated through all records in each page" do
+        @ids.length.should == total
+        @ids.should == expected_ids
+      end
+
+    end
+
+    context "when iterating through 5 out of 10 pages" do
+      
+      let(:pages) { 10 }
+
+      before do
+        # - Clarity over brief
+        expect_request_pages(limit, pages, 1, limit)
+        expect_request_pages(limit, pages, 2, limit)
+        expect_request_pages(limit, pages, 3, limit)
+        expect_request_pages(limit, pages, 4, limit)
+        expect_request_pages(limit, pages, 5, limit)
+
+        @ids = []
+        @pages = []
+
+        conditions!
+        subject.limit(limit)
+
+        last_page = 0
+        # Max of 5 pages
+        subject.each_page(5) do |record|
+          @ids << record.id
+      
+          if(last_page != subject.page)
+            @pages << subject.page
+            last_page = subject.page
+          end
+        end
+      end
+
+      it "should have iterated through 5 pages" do
+        @pages.should == expected_range
+      end
+
+      it "should have iterated through all records in each page" do
+        @ids.length.should == total
+        @ids.should == expected_ids
+      end
+
+    end  
 
   end
 
