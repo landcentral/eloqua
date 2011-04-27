@@ -7,6 +7,8 @@ GEM
       i18n (~> 0.5.0)
     activesupport (3.0.6)
     builder (2.1.2)
+    ci_reporter (1.6.4)
+      builder (>= 2.1.2)
     crack (0.1.8)
     diff-lcs (1.1.2)
     flexmock (0.9.0)
@@ -47,6 +49,7 @@ DEPENDENCIES
   activemodel
   activesupport
   builder
+  ci_reporter
   flexmock
   rspec (> 2.0)
   ruby-fsevent

@@ -6,3 +6,4 @@ irb.rb
 doc
 .yardoc
 test.rb
+spec/reports
