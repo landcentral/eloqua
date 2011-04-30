@@ -42,8 +42,13 @@ describe Eloqua::Query do
       map :C_EmailAddress => :email
     end
   end
-    
-  
+
+  before do
+    subject.request_delay = false
+  end
+
+  after { Timecop.return }
+
   def mock_query_hash(records, pages)
     entities = []
     records.to_i.times do |i|
@@ -66,29 +71,32 @@ describe Eloqua::Query do
 
   def conditions!(query = nil)
     query = (query.nil?)? subject : query
-
     query.\
       on(:email, '=', '*').\
       on('Date', '>', '2011-04-20')
   end
 
-  def limit!(query = nil)
+  def limit!(query = nil, page = 1)
     query = (query.nil?)? subject : query
-    query.page(1).limit(200)
+    query.page(page).limit(200)
   end
 
-  def expect_simple_request
+  def expect_simple_request(page = 1)
     xml_body = xml! do |xml|
       api = subject.remote_object.api
       xml.eloquaType do
         xml.template!(:object_type, api.remote_type('Contact'))
       end
       xml.searchQuery(expected_query)
-      xml.pageNumber(1)
+      xml.pageNumber(page)
       xml.pageSize(200)
     end
     mock_eloqua_request(:query, :contact_email_one).\
-      with(:service, :query, xml_body).once
+      with(:service, :query, xml_body).globally.ordered.once
+  end
+
+  def round_1(number)
+    sprintf('%.1f', number).to_f
   end
 
   def expect_request_pages(records, pages, current_page = nil, limit = 200)
@@ -109,10 +117,11 @@ describe Eloqua::Query do
     mock
   end
 
-  def simple_request!
-    expect_simple_request
+  def simple_request!(page = 1)
+    expect_simple_request(page)
+    subject.clear_conditions!
     conditions!
-    limit!
+    limit!(nil, page)
     subject.request!
   end
 
@@ -377,6 +386,64 @@ describe Eloqua::Query do
         subject.total_pages.should == 0
       end
 
+    end
+
+    # Eloqua has a reuqest limit of 1 per second on queries.
+    # The goal of this spec is to specify that no requests run
+    # for at least a second after the first request.
+    context "when making a request within the time of the request delay" do
+      
+      it "should save the initial request time to query_started" do
+        Timecop.freeze(Time.now) do
+          simple_request!
+          subject.send(:query_started).should == Time.now
+        end
+      end
+
+      context "with #request_delay of 1" do
+        before { subject.request_delay = 1 }
+
+        it "should call sleep when requesting again within the delay" do
+          now = Time.now
+          Timecop.freeze(now) do
+            simple_request! # Setup initial request
+
+            flexmock(subject).should_receive(:sleep).with(FlexMock.on {|arg| round_1(arg) == 0.9 }).once
+            Timecop.travel(now + 0.1)
+            simple_request!(2)
+          end
+
+        end
+
+
+      end
+    end
+
+  end
+
+  context "#wait_for_request_delay" do
+
+    it "should return false when request_delay is false" do
+      subject.request_delay = false
+      simple_request! # set query start time
+
+      subject.wait_for_request_delay.should == false
+    end
+
+    it "should retun false when query_started is false" do
+      subject.request_delay = 1
+      subject.wait_for_request_delay.should == false
+    end
+
+    it "should the amount of time to wait as a fraction when a delay is required" do
+      subject.request_delay = 1
+      now = Time.now
+      Timecop.freeze(now) do
+        simple_request!
+        Timecop.travel(now + 0.1)
+        delay = round_1(subject.wait_for_request_delay)
+        delay.should == 0.9
+      end
     end
 
   end

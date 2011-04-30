@@ -130,6 +130,10 @@ module Eloqua
     # @return self
     def request!
       return if has_requested?
+      sleep_for = wait_for_request_delay
+      if(sleep_for)
+        sleep(sleep_for)
+      end
       xml_query = api.builder do |xml|
         xml.eloquaType do
           xml.template!(:object_type, remote_object.remote_type)
@@ -149,9 +153,17 @@ module Eloqua
         xml.pageSize(limit)
       end
 
+      # Add timestamp of when we made request
+      @_query_started = Time.now
       result = api.request(:query, xml_query)
+
+      # Clear collection
+      collection.clear
+      
+      # Mark as requested
       @has_requested = true
-			collection.clear
+
+			
       if(result[:entities])
         @total_pages = result[:total_pages].to_i
 				entities = Eloqua.format_results_for_array(result, :entities, :dynamic_entity)
@@ -169,6 +181,18 @@ module Eloqua
 				collection
       else
         @total_pages = 0
+        false
+      end
+    end
+
+    def wait_for_request_delay
+      if(request_delay && query_started)
+        now = Time.now
+        wait_until = Time.at((request_delay + query_started.to_f))
+        if(wait_until > now)
+          wait_until - now
+        end
+      else
         false
       end
     end
