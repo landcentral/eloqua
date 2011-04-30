@@ -402,9 +402,9 @@ describe Eloqua::Query do
 
       context "with #request_delay of 1" do
         before { subject.request_delay = 1 }
+        let(:now) { Time.now }
 
         it "should call sleep when requesting again within the delay" do
-          now = Time.now
           Timecop.freeze(now) do
             simple_request! # Setup initial request
 
@@ -412,9 +412,17 @@ describe Eloqua::Query do
             Timecop.travel(now + 0.1)
             simple_request!(2)
           end
-
         end
 
+        it "should not call sleep when request has been made after delay" do
+          Timecop.freeze(now) do
+            simple_request!
+            flexmock(subject).should_receive(:sleep).never
+            Timecop.travel(now + 1.1)
+            simple_request!(2)
+          end
+        end
+      
 
       end
     end
