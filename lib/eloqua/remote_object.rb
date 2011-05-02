@@ -89,7 +89,7 @@ module Eloqua
 
     private :map_attributes, :reverse_map_attributes
     
-    # Persistance
+    # Persistence
     
     def create
       attrs = convert_attribute_values(attributes, :export)
@@ -122,6 +122,9 @@ module Eloqua
         false
       end
     end
+
+    # For factory girl
+    alias_method :save!, :save
     
     def update_attributes(attrs)
       attrs = sanitize_for_mass_assignment(attrs)
@@ -150,7 +153,6 @@ module Eloqua
     
     def is_attribute_method?(method)
       attr = method.to_s.gsub(/\=$/, '')
-      
       if(attributes.has_key?(attr) || attribute_map_reverse.has_key?(attr))
         attr_type = (method.to_s =~ /\=$/)? :write : :read
       else

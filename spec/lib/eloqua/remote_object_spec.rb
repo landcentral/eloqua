@@ -565,7 +565,7 @@ describe Eloqua::RemoteObject do
 
   end
 
-  context "#self.attr_boolean_checkbox" do
+  context "#self.attr_checkbox" do
 
     let(:klass) do
       Class.new(subject) do
