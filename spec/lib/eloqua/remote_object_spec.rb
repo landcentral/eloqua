@@ -440,6 +440,40 @@ describe Eloqua::RemoteObject do
     end    
     
     context "#update_attributes" do
+      
+      context "when successfuly updating the record and ignoring sanitization" do
+        let(:klass) do
+          Class.new(subject) do
+            map :C_EmailAddress => :email
+            map :C_FirstName => :name
+            map :ContactID => :id
+
+            attr_accessible :email
+          end
+        end
+
+        let(:object) { klass.new(:id => 1, :name => 'james') }
+
+        before do
+          flexmock(klass).should_receive(:update_object).\
+                             with(1, {'C_EmailAddress' => 'new', 'C_FirstName' => 'gomez'}).\
+                             and_return(true)
+
+          @result = object.update_attributes({
+            :email => 'new',
+            :name => 'gomez'
+          }, true)      
+        end
+
+        it 'should call update entity to make the api call' do
+          @result.should be_true
+        end
+
+        specify { object.email.should == 'new' }
+        specify { object.name.should == 'gomez' } 
+
+      end
+
       context "when successfuly updating record" do
         let(:klass) do
           Class.new(subject) do

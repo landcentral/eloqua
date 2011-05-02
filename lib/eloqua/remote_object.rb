@@ -126,8 +126,17 @@ module Eloqua
     # For factory girl
     alias_method :save!, :save
     
-    def update_attributes(attrs)
-      attrs = sanitize_for_mass_assignment(attrs)
+    # Updates the attributes in the record with given
+    # hash and then saves the object.
+    #
+    # By default uses assignment security provided by ActiveModel.
+    # by using ignore_security you can turn this off
+    #
+    # @param [Hash] attributes to write
+    # @param [Boolean] when true ignores assignment security
+    # @return [Boolean] Result of the save
+    def update_attributes(attrs, ignore_security = false)
+      attrs = sanitize_for_mass_assignment(attrs) unless ignore_security
       attrs.each do |key, value|
         write_attribute(key, value)
       end
