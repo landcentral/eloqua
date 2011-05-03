@@ -65,7 +65,7 @@ module Eloqua
         def reverse_map_attributes(attributes)
           results = {}.with_indifferent_access
           attributes.each do |key, value|
-            results[@instance_reverse_keys[key]] = value
+            results[@instance_reverse_keys.fetch(key){key}] = value
           end
           results
         end

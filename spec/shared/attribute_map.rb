@@ -82,59 +82,92 @@ shared_examples_for "uses attribute map" do
   end  
   
   context "#map_attributes" do
+    let(:input) do
+      {
+          :C_EmailAddress => 'email@address.com',
+          :ContactID => '1',
+          :normal_id => 'wow'
+      }.with_indifferent_access
+    end
 
-     let(:input) do
-       {
-           :C_EmailAddress => 'email@address.com',
-           :ContactID => '1',
-           :normal_id => 'wow'
-       }.with_indifferent_access
-     end
+    let(:expected) do
+      {
+          :email_address => 'email@address.com',
+          :id => '1',
+          :normal_id => 'wow'
+      }.with_indifferent_access
+    end
 
-     let(:expected) do
-       {
-           :email_address => 'email@address.com',
-           :id => '1',
-           :normal_id => 'wow'
-       }.with_indifferent_access
-     end
+    let(:reverse) do
+      {
+        :email_address => 'C_EmailAddress',
+        :id => 'ContactID',
+        :normal_id => 'normal_id'
+      }.with_indifferent_access
+    end
 
-     let(:reverse) do
-       {
-         :email_address => 'C_EmailAddress',
-         :id => 'ContactID',
-         :normal_id => 'normal_id'
-       }.with_indifferent_access
-     end
+    before do
+      klass_object = Class.new(subject) do
+        map :ContactID => 'id'
+      end
+      @klass = klass_object.new
+      @result = @klass.send(:map_attributes, input)
+    end
 
-     before do
-       klass_object = Class.new(subject) do
-         map :ContactID => 'id'
-       end
-       @klass = klass_object.new
-       @result = @klass.send(:map_attributes, input)
-     end
+    it 'should map attributes from CamelCase format to snake_case format' do
+      @result.should == expected
+    end
 
-     it 'should map attributes from CamelCase format to snake_case format' do
-       @result.should == expected
-     end
+    it 'should store the original key names in attribute_keys_to_eloqua' do
+      @klass.instance_reverse_keys.should == reverse
+    end
 
-     it 'should store the original key names in attribute_keys_to_eloqua' do
-       @klass.instance_reverse_keys.should == reverse
-     end
+    context "#reverse_map_attributes" do
+    
+      context "when given valid input" do
+        before do
+          @reversed = @klass.send(:reverse_map_attributes, @result)
+        end
 
-     context "#reverse_map_attributes" do
+        it 'should be able to reverse map_attributes back into input' do
+          @reversed.should == input  
+        end          
+      end
 
-       before do
-         @reversed = @klass.send(:reverse_map_attributes, @result)
-       end
+      context "when given invalid input" do
+        let(:input) do
+          {
+            :id => '1',
+            :phone_field => 'phoney'
+          }
+        end
 
-       it 'should be able to reverse map_attributes back into input' do
-         @reversed.should == input  
-       end
+        let(:expected) do
+          {
+            :ContactID => '1',
+            :phone_field => 'phoney'
+          }.with_indifferent_access
+        end
 
-     end
+        let(:klass) do
+          Class.new(subject) do
+            map :ContactID => 'id'
+          end
+        end
 
-   end
-  
+        before do
+          object = klass.new
+          object.send(:map_attributes, {})
+          @result = object.send(:reverse_map_attributes, input)
+        end
+
+        it "should use given key when it is not known" do
+          @result.should == expected
+        end
+        
+      end
+    
+    end
+
+  end  
 end

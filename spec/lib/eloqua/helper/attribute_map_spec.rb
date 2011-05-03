@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'eloqua/remote_object'
 
 describe Eloqua::Helper::AttributeMap do
   
