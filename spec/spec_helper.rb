@@ -21,6 +21,7 @@ Dir[File.dirname(__FILE__) + '/shared/**/*.rb'].each {|support| require support}
 
 Savon.configure do |config|
   config.log = false
+  config.raise_errors = false
 end
 
 RSpec.configure do |config|

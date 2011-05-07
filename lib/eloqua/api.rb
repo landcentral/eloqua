@@ -27,7 +27,7 @@ module Eloqua
       delegate :builder_template, :to => Eloqua::Builder::Xml
       delegate :builder_templates, :to => Eloqua::Builder::Xml
 
-      cattr_accessor :last_request, :last_response
+      attr_accessor :last_request, :last_response, :soap_error, :http_error
 
       @@clients = {}
 
@@ -85,16 +85,27 @@ module Eloqua
         result
       end
 
-
       # Sends remote request and returns a response object
       def send_remote_request(type, name, soap_body = nil, &block)
+        @soap_error = nil
+        @http_error = nil
+
         request = client(type).request(:wsdl, name) do
           soap.namespaces["xmlns:arr"] = XML_NS_ARRAY
           soap.element_form_default = :qualified
           soap.body = soap_body if soap_body
           instance_eval(&block) if block_given?
         end
+        response_errors(request)
         request
+      end
+
+      def response_errors(response)
+        @soap_error = Eloqua::SoapError.new(response.http)
+        @http_error = Eloqua::HTTPError.new(response.http)
+
+        raise @soap_error if @soap_error.present?
+        raise @http_error if @http_error.present?
       end
 
     end

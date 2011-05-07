@@ -46,6 +46,25 @@ describe Eloqua::Api do
     end
 
   end
+  
+  context "#raise_response_errors" do
+
+    context "when response given is an HTTP error" do
+      it "should raise Eloqua::HTTPError" do
+        
+      end
+    end
+
+    context "when response given is a SOAP Fault" do
+
+      it "should raise an SoapError" do
+        mock_response(:query, :fault)
+        lambda { @response = subject.request(:service, :query) }.should raise_exception(Eloqua::SoapError)
+      end
+
+    end
+
+  end
 
   context "#client" do
     

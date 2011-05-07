@@ -1,0 +1,43 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+      <s:Header>
+            <o:Security s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+                  <u:Timestamp u:Id="_0">
+                        <u:Created>2011-05-07T21:55:56.609Z</u:Created>
+                        <u:Expires>2011-05-07T22:00:56.609Z</u:Expires>
+                  </u:Timestamp>
+            </o:Security>
+      </s:Header>
+      <s:Body>
+            <s:Fault>
+                  <faultcode>s:Client</faultcode>
+                  <faultstring xml:lang="en-US">The creator of this fault did not specify a Reason.</faultstring>
+                  <detail>
+                        <ValidationFault xmlns="http://www.microsoft.com/practices/EnterpriseLibrary/2007/01/wcf/validation" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                              <Details xmlns:a="http://schemas.datacontract.org/2004/07/Microsoft.Practices.EnterpriseLibrary.Validation.Integration.WCF">
+                                    <a:ValidationDetail>
+                                          <a:Key i:nil="true"/>
+                                          <a:Message>The value cannot be null.</a:Message>
+                                          <a:Tag>eloquaType</a:Tag>
+                                    </a:ValidationDetail>
+                                    <a:ValidationDetail>
+                                          <a:Key i:nil="true"/>
+                                          <a:Message>The SearchQuery parameter is not in the correct format.</a:Message>
+                                          <a:Tag>searchQuery</a:Tag>
+                                    </a:ValidationDetail>
+                                    <a:ValidationDetail>
+                                          <a:Key i:nil="true"/>
+                                          <a:Message>The value must fall within the range "1" (Inclusive) - "-1" (Ignore).</a:Message>
+                                          <a:Tag>pageNumber</a:Tag>
+                                    </a:ValidationDetail>
+                                    <a:ValidationDetail>
+                                          <a:Key i:nil="true"/>
+                                          <a:Message>The value must fall within the range "1" (Inclusive) - "200" (Inclusive).</a:Message>
+                                          <a:Tag>pageSize</a:Tag>
+                                    </a:ValidationDetail>
+                              </Details>
+                        </ValidationFault>
+                  </detail>
+            </s:Fault>
+      </s:Body>
+</s:Envelope>
+
