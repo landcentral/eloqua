@@ -140,6 +140,8 @@ module Eloqua
         end
         xml.searchQuery(build_query)
 
+        # This won't harm anything but it is changing the
+        # fields to its mapped elouqa name.
         if(!fields.blank? && fields.is_a?(Array))
           fields.map! do |field|
             field = remote_object.eloqua_attribute(field)

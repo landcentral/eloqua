@@ -19,6 +19,10 @@ end
 Dir[File.dirname(__FILE__) + '/support/**/*.rb'].each {|support| require support}
 Dir[File.dirname(__FILE__) + '/shared/**/*.rb'].each {|support| require support}
 
+Savon.configure do |config|
+  config.log = false
+end
+
 RSpec.configure do |config|
   
   include Eloqua::RSpec::Helper

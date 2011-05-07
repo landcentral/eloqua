@@ -24,7 +24,7 @@ describe Eloqua::Api do
     context "When returning multiple records" do
 
       before do
-        mock_eloqua_request(:retrieve, :contact_multiple)
+        mock_response(:retrieve, :contact_multiple)
         @response = subject.request(:service, :retrieve) do
         end
       end
@@ -32,6 +32,16 @@ describe Eloqua::Api do
       it 'should return dynamic entity key as the top level hash' do
         @response.should have_key(:dynamic_entity)
       end
+
+      it "should have stored response in #last_response" do
+        body = Savon::Spec::Fixture.load(:retrieve, :contact_multiple)
+        subject.last_response.should == body
+      end
+
+      it "should have stored response in #last_request" do
+        subject.last_request.should_not be_blank
+      end
+      
 
     end
 
@@ -99,68 +109,6 @@ describe Eloqua::Api do
       @entity[:type].should == 'Base'
     end
 
-  end
-
-  context "test requests"  do
-
-   # it "should be able to retrieve a row" do
-   #   body = {
-   #      :entityType => entity('Contact'),
-   #      :ids => {'arr:int' => [900000000]},
-   #      :fieldNames => {'arr:string' => ['ContactID', 'C_EmailAddress']},
-   #      :order! => [:entityType, :ids, :fieldNames]
-   #   }
-   #   
-   #   r = subject.request(:service, :retrieve, body)
-   #   pp r.to_hash
-   # end
-   # 
-   # it "should be able to retrieve a asset row" do
-   #   body = {
-   #      :assetType => subject.entity('ContactGroup'),
-   #      :ids => {'arr:int' => [112]},
-   #      :order! => [:assetType, :ids]
-   #   }
-   #   asset = {}
-   #   #pp subject.send_remote_request(:service, :retrieve_asset, body)
-   # end
-
-   # it "should be able to run a query by email address" do
-   #   request = subject.request(:service, :query) do
-   #     soap.body = {
-   #         :eloquaType => entity('Contact'),
-   #         :searchQuery => "C_EmailAddress='*@lightsofapollo.com' AND C_EmailAddress='iam.revelation@gmail.com'",
-   #         :fieldNames => {'arr:string' => ['C_Arizona1', 'C_California1', 'C_EmailAddress', 'ContactID']},
-   #         :pageNumber => '1',
-   #         :pageSize => '20',
-   #         :order! => [:eloquaType, :searchQuery, :fieldNames, :pageNumber, :pageSize]
-   #     }
-   #   end
-   #   pp request.to_hash
-   # end
-
-  #   it "should be able to update james@lightsofapollo.com's contact information" do
-  # 
-  #       builder = subject.builder
-  # 
-  #       template = subject.builder_template(:dynamic_entity, subject.entity('Contact'), '124194', {
-  #           :C_FirstName => 'James',
-  #           :C_Arizona1 => 'No',
-  #           :C_California1 => 'Yes'
-  #       })
-  # 
-  #       request_body = builder.entities do
-  #         builder.DynamicEntity(&template)
-  #       end
-  # 
-  #       request = subject.send_remote_request(:service, :update) do
-  #         soap.body = request_body
-  #       end
-  # 
-  #       puts request.to_xml
-  #     end
-  # 
-  
   end
 
 end

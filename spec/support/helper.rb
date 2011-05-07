@@ -7,12 +7,19 @@ module Eloqua
         httpi = HTTPI::Response.new(code, headers, body)
         Savon::SOAP::Response.new(httpi)
       end
-  
+
       def mock_eloqua_request(type, name, code = 200, headers = {})
         mock = soap_fixture(type, name, code, headers)
-        flexmock(Eloqua::Api).should_receive(:send_remote_request).returns(mock)
+        flexmock(Eloqua::Api).should_receive(:send_remote_request).and_return(mock)
       end
-                        
+      
+      def mock_response(type, name, code = 200, headers = {})
+        body = Savon::Spec::Fixture.load(type, name)
+        mock = HTTPI::Response.new(code, headers, body)
+        flexmock(HTTPI).should_receive(:post).and_return(mock)
+      end
+
+
       def mock_api_request(method = nil, xml_body = nil, result = nil)
         mocked_object = subject
 

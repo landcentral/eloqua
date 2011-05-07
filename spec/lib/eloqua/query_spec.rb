@@ -388,7 +388,7 @@ describe Eloqua::Query do
 
     end
 
-    # Eloqua has a reuqest limit of 1 per second on queries.
+    # Eloqua has a request limit of 1 per second on queries.
     # The goal of this spec is to specify that no requests run
     # for at least a second after the first request.
     context "when making a request within the time of the request delay" do
