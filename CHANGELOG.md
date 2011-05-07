@@ -1,3 +1,6 @@
+## 0.2.3
+ - Added last_request, last_response to Eloqua::API
+
 ## 0.2
  - Abstracted out majority of requests into Eloqua::Api::Service
 
