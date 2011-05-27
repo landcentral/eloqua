@@ -42,6 +42,15 @@ shared_examples_for "class method delegates to set_callback" do |method, callbac
       klass.send(method, &block)
     end
 
+
+    it "should be able to set a symbol as the final argument for a method" do
+      callback_method = :object_id
+
+      klass = flexmock(subject)
+      klass.should_receive(:set_callback).with(callback, state, callback_method).once
+      klass.send(method, callback_method)
+    end
+
   end
 
 end
