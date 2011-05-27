@@ -12,6 +12,9 @@ module Eloqua
     include ActiveModel::Validations
     include ActiveModel::Conversion
     include ActiveModel::AttributeMethods
+    include ActiveSupport::Callbacks
+
+    define_callbacks :save, :update, :create
     
     # Because we never absolutely know what attributes are defined
     # We do not use define_attribute_method for dirty meaning #{attr}_changed? will not work
@@ -92,31 +95,37 @@ module Eloqua
     # Persistence
     
     def create
-      attrs = convert_attribute_values(attributes, :export)
-      attrs = reverse_map_attributes(attrs)
-      result = self.class.create_object(attrs)
-      if(result)
-        @_persisted = true
-        write_attribute(:id, result[:id])
-        true
-      else
-        false
+      run_callbacks :create do
+        attrs = convert_attribute_values(attributes, :export)
+        attrs = reverse_map_attributes(attrs)
+        result = self.class.create_object(attrs)
+        if(result)
+          @_persisted = true
+          write_attribute(:id, result[:id])
+          true
+        else
+          false
+        end
       end
     end
     
     def update
-      update_attributes = changed.inject({}) do |map, attr|
-        map[attr] = send(attr.to_sym)
-        map
-      end      
-      attrs = convert_attribute_values(update_attributes, :export)
-      attrs = reverse_map_attributes(attrs)
-      self.class.update_object(self.attributes[primary_key].to_i, attrs)
+      run_callbacks :update do
+        update_attributes = changed.inject({}) do |map, attr|
+          map[attr] = send(attr.to_sym)
+          map
+        end      
+        attrs = convert_attribute_values(update_attributes, :export)
+        attrs = reverse_map_attributes(attrs)
+        self.class.update_object(self.attributes[primary_key].to_i, attrs)
+      end
     end
     
     def save(options = {})
       if(valid?)
-        (persisted?) ? update : create
+        run_callbacks :save do
+          (persisted?) ? update : create
+        end
         true
       else
         false
@@ -247,6 +256,15 @@ module Eloqua
         end
       end
 
+      [:save, :update, :create].each do |callback_type|
+        [:before, :after].each do |callback_state|
+          module_eval(<<-RUBY, __FILE__, (__LINE__ - 2))
+            def #{callback_state}_#{callback_type}(&block)
+              set_callback(:#{callback_type}, :#{callback_state}, &block)
+            end
+          RUBY
+        end
+      end
             
     end
 

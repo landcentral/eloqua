@@ -29,6 +29,20 @@ shared_examples_for 'remote operation that converts attribute values' do |operat
     end
 
   end
+end
+
+shared_examples_for "class method delegates to set_callback" do |method, callback, state|
+  
+  context "#self.#{method}" do
+
+    it "should delegate to set_callback #{callback}, #{state}, &block" do
+      block = Proc.new {}
+      klass = flexmock(subject)
+      klass.should_receive(:set_callback).with(callback, state, block).once
+      klass.send(method, &block)
+    end
+
+  end
 
 end
 
@@ -39,6 +53,25 @@ describe Eloqua::RemoteObject do
       self.remote_type = Eloqua::Api.remote_type('Contact')
       self.remote_group = :entity
       
+      attr_accessor :callbacks_called
+      attr_accessor :test_callbacks
+
+      def test_callback(type, state, &block)
+        class_eval do
+          set_callback(type, state, &block)
+        end
+      end
+
+      [:save, :update, :create].each do |callback_type|
+        [:before, :after].each do |callback_state|
+          set_callback(callback_type, callback_state) do
+            self.callbacks_called ||= {}
+            self.callbacks_called[callback_type] ||= []
+            self.callbacks_called[callback_type] << callback_state
+          end
+        end
+      end
+
       def self.name
         'ContactEntity'
       end
@@ -49,13 +82,21 @@ describe Eloqua::RemoteObject do
   let(:remote_type) do
     subject.api.remote_type('Contact')
   end
-  
+    
+  it_behaves_like 'uses attribute map'
+  it_behaves_like 'class level delegation of remote operations for', :entity
+
+  [:save, :update, :create].each do |callback_type|
+    [:before, :after].each do |callback_state|
+      it_behaves_like "class method delegates to set_callback",
+        "#{callback_state}_#{callback_type}".to_sym, callback_type, callback_state
+    end
+  end
+
   context "#self.remote_group" do
     specify { subject.remote_group.should == :entity }
   end
   
-  it_behaves_like 'uses attribute map'
-  it_behaves_like 'class level delegation of remote operations for', :entity
 
   context "#initialize" do
 
@@ -328,6 +369,7 @@ describe Eloqua::RemoteObject do
     
     it_behaves_like 'remote operation that converts attribute values', :update
     
+
     context "#update" do
 
       before do
@@ -338,6 +380,10 @@ describe Eloqua::RemoteObject do
         object.name = 'first'
         
         @result = object.update
+      end
+
+      it "should have called before and after callbacks for update" do
+        object.callbacks_called[:update].should == [:before, :after] 
       end
 
       it 'should call update entity to make the api call' do
@@ -352,24 +398,30 @@ describe Eloqua::RemoteObject do
     it_behaves_like 'remote operation that converts attribute values', :create 
 
     context "#create" do
-      let(:object) { klass.new }
-      
-      before do
-        flexmock(klass).should_receive(:create_object).\
-                           with(expected).and_return({:id => 1})
-                            
-        object.email = 'email'
-        object.name = 'first'
-        @result = object.create
-      end
+      context "when successfully creating record" do
+        let(:object) { klass.new }
+        
+        before do
+          flexmock(klass).should_receive(:create_object).\
+                             with(expected).and_return({:id => 1})
+                              
+          object.email = 'email'
+          object.name = 'first'
+          @result = object.create
+        end
 
-      it 'should call update entity to make the api call' do
-        @result.should be_true
-      end
+        it "should call before and after callbacks" do
+          object.callbacks_called[:create].should == [:before, :after]
+        end
 
-      specify { object.id.should == 1 }
-      specify { object.email.should == 'email' }
-      specify { object.name.should == 'first' }
+        it 'should call update entity to make the api call' do
+          @result.should be_true
+        end
+
+        specify { object.id.should == 1 }
+        specify { object.email.should == 'email' }
+        specify { object.name.should == 'first' }
+      end
     end
     
     context "#save" do
@@ -392,6 +444,10 @@ describe Eloqua::RemoteObject do
         
         it 'should now have an id' do
           object.id.should == 1
+        end
+
+        it "should call before and after callbacks" do
+          object.callbacks_called[:save].should == [:before, :after]
         end
         
       end
@@ -425,6 +481,10 @@ describe Eloqua::RemoteObject do
         
         let(:object) do
           klass.new(:id => 1)
+        end
+
+        it "should not have called any callbacks" do
+          object.callbacks_called.should be_nil
         end
         
         it 'should not be valid' do
