@@ -43,19 +43,43 @@ describe Eloqua::Entity do
   end
 
   context "#list_memberships" do
-    
+       
     it 'should delegate call to class level with current id' do
       flexmock(subject).should_receive(:list_memberships).with(1).once
       object.list_memberships
     end
-    
+   
   end
 
   context "#self.list_memberships" do
+
+    let(:mock_memberships) do
+      list = []
+
+      3.times do |n|
+        list << {:id => n, :type => 'ContactGroup', :name => "ContactGroup#{n}"}
+      end
+
+      list
+    end
+
+
     it 'should delegate call to api' do
       flexmock(subject.api).should_receive(:list_memberships).with(subject.remote_type, 1).once
       subject.list_memberships(1)
     end
+
+    it "should index memberships by id" do
+      flexmock(subject.api).should_receive(:list_memberships).with(subject.remote_type, 1).once.\
+        and_return(mock_memberships)
+
+      memberships = subject.list_memberships(1)
+      memberships.should be_an(Hash)
+      memberships.each do |key, membership|
+        key.should == membership[:id]
+      end
+    end
+
   end
 
   context "#self.remote_group" do
