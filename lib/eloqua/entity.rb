@@ -42,7 +42,7 @@ module Eloqua
             map
           end
         else
-          memberships
+          memberships || {}
         end
           
       end

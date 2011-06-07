@@ -80,6 +80,19 @@ describe Eloqua::Entity do
       end
     end
 
+    context "when low level api returns nil" do
+
+      before do
+        flexmock(subject.api).should_receive(:list_memberships).\
+          with(subject.remote_type, 1).\
+          once.and_return(nil)
+       end
+
+      it "should return an empty hash" do
+        subject.list_memberships(1).should == {}
+      end
+    end
+
   end
 
   context "#self.remote_group" do
