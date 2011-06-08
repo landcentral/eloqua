@@ -259,8 +259,10 @@ module Eloqua
       [:save, :update, :create].each do |callback_type|
         [:before, :after].each do |callback_state|
           module_eval(<<-RUBY, __FILE__, (__LINE__ - 2))
-            def #{callback_state}_#{callback_type}(&block)
-              set_callback(:#{callback_type}, :#{callback_state}, &block)
+            def #{callback_state}_#{callback_type}(*args, &block)
+              args.unshift(:#{callback_state})
+              args.unshift(:#{callback_type})
+              set_callback(*args, &block)
             end
           RUBY
         end
