@@ -1,29 +1,27 @@
 require 'spec_helper'
 
 describe Eloqua::Builder::Xml do
-  
+
   def xml!(&block)
     subject.create(&block)
   end
 
   subject { Eloqua::Builder::Xml }
-  
+
   # We might reveal methods on builder so create blank subclass
   subject {
     Class.new(Eloqua::Builder::Xml) do
-      reveal(:class)
-      reveal(:is_a?)
     end
   }
 
   let(:xml) do
     subject.new(:namespace => 'wsdl')
-  end  
-  
+  end
+
   it "should include Eloqua::Builder::Templates" do
     subject.should include(Eloqua::Builder::Templates)
   end
-  
+
   it 'should allow a block during new providing self' do
     subject.new do |xml|
       xml.is_a?(subject)
@@ -31,7 +29,7 @@ describe Eloqua::Builder::Xml do
   end
 
   context "when default namespace options is set" do
-    
+
     let(:xml) do
       subject.new(:namespace => 'wsdl')
     end
@@ -45,48 +43,48 @@ describe Eloqua::Builder::Xml do
       output = xml.arr(:int) {}
       output.strip.should == '<arr:int></arr:int>'
     end
-    
+
   end
-  
+
   # Entity/Asset Helpers
-  
+
   context '#dynamic_object!' do
-    
+
     let(:expected) { '<DynamicAsset>content</DynamicAsset>' }
-    
+
     it 'should return expected xml' do
       xml! {|xml| xml.dynamic_object!(:asset, 'content') }.should == expected
     end
-    
+
   end
-  
+
   context '#object_type!' do
     let(:expected) { '<AssetType>content</AssetType>' }
-    
+
     it 'should return expected xml' do
       xml! {|xml| xml.object_type!(:asset, 'content') }.should == expected
     end
-    
+
   end
-  
+
   context '#object_type_lower!' do
     let(:expected) { '<assetType>content</assetType>' }
-    
+
     it 'should return expected xml' do
       xml! {|xml| xml.object_type_lower!(:asset, 'content') }.should == expected
     end
-    
-  end  
-  
+
+  end
+
   context '#object_collection!' do
     let(:expected) { "<entities><one>1</one></entities>" }
     it 'should return expected xml' do
       xml! {|xml| xml.object_collection!(:entity) { xml.one('1') } }.should == expected
     end
   end
-  
+
   context "#self.create" do
-    
+
     let(:klass) do
       Class.new(subject) do
         define_builder_template(:zomg) do |xml|
@@ -94,11 +92,11 @@ describe Eloqua::Builder::Xml do
         end
       end
     end
-    
+
     let(:xml_body) do
       '<big>1</big><wow>zomg</wow>'
     end
-    
+
     it 'should produce expected output' do
       out = klass.create do |xml|
         xml.big('1')
@@ -106,9 +104,9 @@ describe Eloqua::Builder::Xml do
       end
       out.should == xml_body
     end
-    
+
   end
-  
+
   context 'xml templates' do
 
     share_examples_for "expected template output" do |template|
@@ -132,12 +130,12 @@ describe Eloqua::Builder::Xml do
     let(:entity) do
       Eloqua::Api.remote_type('Contact')
     end
-    
+
     context ':object' do
       let(:args) do
         ['random', Eloqua::Api.remote_type('Contact'), 1]
       end
-      
+
       let(:expected) do
         xml! do |xml|
           xml.random do
@@ -148,9 +146,9 @@ describe Eloqua::Builder::Xml do
           end
         end
       end
-      
+
       it_behaves_like 'expected template output', :object
-      
+
     end
 
     context ':dynamic' do
@@ -256,7 +254,7 @@ describe Eloqua::Builder::Xml do
 
     end
 
-  end  
+  end
 
 
 end

@@ -7,3 +7,5 @@ doc
 .yardoc
 test.rb
 spec/reports
+/nbproject
+/nbproject/private/
