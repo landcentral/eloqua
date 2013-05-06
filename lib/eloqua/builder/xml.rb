@@ -7,9 +7,9 @@ module Eloqua
     # This could (and likely should) be submitted as a patch for
     # the main builder class
     class Xml < ::Builder::XmlMarkup
-      
-      include Eloqua::Builder::Templates
-      
+
+      include ::Eloqua::Builder::Templates
+
       # XML Templates
 
       # For use with strings and integers may do strange
@@ -37,7 +37,7 @@ module Eloqua
           xml.arr(:int, element)
         end
       end
-      
+
       # For use with add/remove membership
       define_builder_template :object do |xml, object_type, type, id|
         xml.tag!(object_type) do
@@ -47,7 +47,7 @@ module Eloqua
           xml.Id(id)
         end
       end
-      
+
       # For use with the entity function
       define_builder_template :object_type do |xml, object|
         xml.ID(object[:id])
@@ -71,16 +71,16 @@ module Eloqua
         xml.tag!("#{object_type.to_s.camelize}Type") do
           xml.template!(:object_type, type)
         end
-        
+
         xml.FieldValueCollection do
           xml.template!(:fields, object_type, attributes)
         end
-        
+
         xml.Id(id) if id
       end
-      
+
       delegate :builder_template, :to => self
-      
+
 
       def initialize(options = {}, &block)
         super
@@ -88,27 +88,27 @@ module Eloqua
         @namespace = options[:namespace].to_sym if options[:namespace]
         yield self if block_given?
       end
-      
+
       def self.create(options = {}, &block)
         new(options, &block).target!
       end
-            
+
       def template!(template, *args)
         builder_template(template, *args).call(self)
       end
-      
+
       def dynamic_object!(sym, *args, &block)
         tag!("Dynamic#{sym.to_s.camelize}", *args, &block)
       end
-      
+
       def object_type!(sym, *args, &block)
         tag!("#{sym.to_s.camelize}Type", *args, &block)
       end
-      
+
       def object_type_lower!(sym, *args, &block)
         tag!("#{sym}Type", *args, &block)
-      end      
-      
+      end
+
       def object_collection!(sym, *args, &block)
         tag!("#{sym.to_s.pluralize.downcase}", *args, &block)
       end
@@ -125,5 +125,5 @@ module Eloqua
     end
 
   end
-  
+
 end
