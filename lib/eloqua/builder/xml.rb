@@ -79,14 +79,15 @@ module Eloqua
         xml.Id(id) if id
       end
 
-      delegate :builder_template, :to => self
-
-
       def initialize(options = {}, &block)
         super
         @namespace = nil
         @namespace = options[:namespace].to_sym if options[:namespace]
         yield self if block_given?
+      end
+
+      def builder_template(name, *args)
+        ::Eloqua::Builder::Xml.builder_template(name, *args)
       end
 
       def self.create(options = {}, &block)
@@ -115,7 +116,7 @@ module Eloqua
 
       # Extend to allow default namespace
       def method_missing(sym, *args, &block)
-        if(@namespace && !args.first.kind_of?(Symbol))
+        if(@namespace && !args.first.kind_of?(::Symbol))
           args.unshift(sym.to_sym)
           sym = @namespace
         end
