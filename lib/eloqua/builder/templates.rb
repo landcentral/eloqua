@@ -2,19 +2,18 @@ module Eloqua
   module Builder
 
     module Templates
+      def self.included(base)
+        base.class_attribute :builder_templates
+        base.builder_templates = {}
 
-      extend ActiveSupport::Concern
-
-      included do
-        class_attribute :builder_templates
-        self.builder_templates = {}
+        base.extend(ClassMethods)
       end
 
       module ClassMethods
 
         def builder_template(name, *args)
           template = builder_templates[name]
-          Proc.new do |xml|
+          ::Proc.new do |xml|
             template.call(xml, *args)
           end
         end
@@ -23,9 +22,6 @@ module Eloqua
           builder_templates[name] = block
         end
       end
-
     end
-
-
   end
 end
