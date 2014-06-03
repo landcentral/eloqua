@@ -83,7 +83,7 @@ module Eloqua
         super
         @namespace = nil
         @namespace = options[:namespace].to_sym if options[:namespace]
-        yield self if block_given?
+        yield self if ::Kernel.block_given?
       end
 
       def builder_template(name, *args)
