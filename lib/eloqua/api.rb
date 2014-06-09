@@ -67,8 +67,7 @@ module Eloqua
 
       def request(type, name, soap_body = nil, &block)
         result = send_remote_request(type, name, soap_body, &block)
-        
-        self.last_request = client(type).soap.to_xml if client(type).soap
+        self.last_request = Nokogiri::XML(soap_body) if soap_body
         self.last_response = result.to_xml if result.respond_to?(:to_xml)
 
         if(result)
