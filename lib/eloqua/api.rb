@@ -54,7 +54,7 @@ module Eloqua
       end
 
       def builder(&block)
-        Eloqua::Builder::Xml.create(:namespace => :wsdl, &block)
+        Eloqua::Builder::Xml.create(:namespace => :tns, &block)
       end
 
       def remote_type(name, type = 'Base', id = 0)
@@ -89,8 +89,7 @@ module Eloqua
       def send_remote_request(type, name, soap_body = nil, &block)
         @soap_error = nil
         @http_error = nil
-
-        request = client(type).request(:wsdl, name) do
+        request = client(type).request(:tns, name) do
           soap.namespaces["xmlns:arr"] = XML_NS_ARRAY
           soap.element_form_default = :qualified
           soap.body = soap_body if soap_body
