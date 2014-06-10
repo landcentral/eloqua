@@ -56,9 +56,9 @@ module Eloqua
       end
 
       # defines entity attribute fields for use in update/create
-      define_builder_template :fields do |xml, object_type, entity_attributes|
+      define_builder_template :fields do |xml, object_type, entity_attributes, sym|
         entity_attributes.each do |attribute, value|
-          xml.tag!("#{object_type.to_s.camelize}Fields") do
+          xml.tag!("#{sym.to_s}:#{object_type.to_s.camelize}Fields") do
             xml.InternalName(attribute.to_s)
             xml.Value(value)
           end
@@ -67,8 +67,9 @@ module Eloqua
 
       # Dynamic entity for update/create/etc...
 
-      define_builder_template :dynamic do |xml, object_type, type, id, attributes|
-        xml.tag!("#{object_type.to_s.camelize}Type") do
+      define_builder_template :dynamic do |xml, object_type, type, id, attributes, sym|
+
+        xml.tag!("#{sym.to_s}:#{object_type.to_s.camelize}Type") do
           xml.template!(:object_type, type)
         end
 
@@ -95,11 +96,14 @@ module Eloqua
       end
 
       def template!(template, *args)
+        sym = @namespace
+        args << sym
         builder_template(template, *args).call(self)
       end
 
+      #DynamicEntity
       def dynamic_object!(sym, *args, &block)
-        tag!("Dynamic#{sym.to_s.camelize}", *args, &block)
+        tag!("#{@namespace.to_s}:Dynamic#{sym.to_s.camelize}", *args, &block)
       end
 
       def object_type!(sym, *args, &block)
@@ -110,8 +114,9 @@ module Eloqua
         tag!("#{sym}Type", *args, &block)
       end
 
+      #entities
       def object_collection!(sym, *args, &block)
-        tag!("#{sym.to_s.pluralize.downcase}", *args, &block)
+        tag!("#{@namespace.to_s}:#{sym.to_s.pluralize.downcase}", *args, &block)
       end
 
       # Extend to allow default namespace
@@ -120,7 +125,8 @@ module Eloqua
           args.unshift(sym.to_sym)
           sym = @namespace
         end
-        super(sym, *args, &block)
+        super(sym, *args, &block) unless sym.to_s == "block_given?"
+
       end
 
     end
